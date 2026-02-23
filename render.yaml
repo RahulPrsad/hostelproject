@@ -1,0 +1,26 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: qr-hostel-management
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: APP_URL
+        sync: false
+      - key: NODEMAILER_HOST
+        sync: false
+      - key: NODEMAILER_PORT
+        value: "587"
+      - key: NODEMAILER_USER
+        sync: false
+      - key: NODEMAILER_PASS
+        sync: false

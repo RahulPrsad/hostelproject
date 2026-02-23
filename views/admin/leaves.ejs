@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaves - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/sidebar') %>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Leave Applications</h1>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
+      <% } %>
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Student</th><th class="text-left p-3">From - To</th><th class="text-left p-3">Reason</th><th class="text-left p-3">Status</th><th class="text-left p-3">Action</th></tr></thead>
+            <tbody>
+              <% leaves.forEach(l => { %>
+                <tr class="border-b">
+                  <td class="p-3"><%= l.studentId ? l.studentId.name : 'N/A' %><br><span class="text-gray-500 text-xs"><%= l.studentId ? l.studentId.email : '' %></span></td>
+                  <td class="p-3"><%= new Date(l.fromDate).toLocaleDateString() %> - <%= new Date(l.toDate).toLocaleDateString() %></td>
+                  <td class="p-3"><%= l.reason %></td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded text-xs <%= l.status === 'approved' ? 'bg-green-100' : l.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100' %>"><%= l.status %></span></td>
+                  <td class="p-3">
+                    <% if (l.status === 'pending') { %>
+                      <form action="/admin/leaves/<%= l._id %>/approve" method="POST" class="inline"><button type="submit" class="text-green-600 hover:underline mr-2">Approve</button></form>
+                      <form action="/admin/leaves/<%= l._id %>/reject" method="POST" class="inline"><button type="submit" class="text-red-600 hover:underline">Reject</button></form>
+                    <% } else { %>-<% } %>
+                  </td>
+                </tr>
+              <% }); %>
+              <% if (leaves.length === 0) { %><tr><td colspan="5" class="p-4 text-gray-500">No leave applications</td></tr><% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

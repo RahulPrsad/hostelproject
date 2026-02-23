@@ -1,0 +1,16 @@
+<nav class="bg-white shadow-sm border-b border-gray-200">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center h-14">
+      <a href="<%= user && user.role === 'admin' ? '/admin/dashboard' : (user && user.role === 'student' ? '/student/dashboard' : '/') %>" class="text-xl font-semibold text-gray-800">Hostel Management</a>
+      <div class="flex items-center gap-4">
+        <% if (typeof user !== 'undefined' && user) { %>
+          <span class="text-gray-600"><%= user.name %></span>
+          <a href="/logout" class="text-red-600 hover:text-red-800">Logout</a>
+        <% } else { %>
+          <a href="/login" class="text-gray-700 hover:text-gray-900">Login</a>
+          <a href="/register" class="text-indigo-600 hover:text-indigo-800">Register</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

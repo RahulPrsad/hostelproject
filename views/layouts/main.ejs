@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Hostel Management' %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <% if (typeof navbar !== 'undefined' && navbar) { %>
+    <%- include('../partials/navbar') %>
+  <% } %>
+  <% if (typeof sidebar !== 'undefined' && sidebar) { %>
+    <div class="flex">
+      <%- include('../partials/sidebar') %>
+      <main class="flex-1 p-6">
+        <%- body %>
+      </main>
+    </div>
+  <% } else { %>
+    <main class="container mx-auto px-4 py-8">
+      <%- typeof body !== 'undefined' ? body : '' %>
+    </main>
+  <% } %>
+  <script src="/js/app.js"></script>
+  <% if (typeof extraScripts !== 'undefined' && extraScripts) { %><%- extraScripts %><% } %>
+</body>
+</html>

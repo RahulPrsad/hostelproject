@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan QR - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/sidebar') %>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Scan Student QR</h1>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-4">
+          <div id="reader" class="w-full"></div>
+          <button type="button" id="startBtn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Start Camera</button>
+          <button type="button" id="stopBtn" class="mt-2 ml-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" style="display:none">Stop</button>
+        </div>
+        <div id="studentCard" class="bg-white rounded-lg shadow p-6 hidden">
+          <h2 class="font-semibold text-lg mb-2">Student Details</h2>
+          <p id="sName" class="text-gray-800"></p>
+          <p id="sEmail" class="text-gray-600 text-sm"></p>
+          <p id="sBranch" class="text-gray-600 text-sm"></p>
+          <p id="sYear" class="text-gray-600 text-sm"></p>
+          <p class="mt-2">Parent: <a id="sParentLink" href="#" class="text-indigo-600 hover:underline">Call Parent</a></p>
+          <input type="hidden" id="studentId" value="">
+          <div class="mt-4 space-y-2">
+            <button type="button" id="issueFruitBtn" class="block w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Issue Fruit</button>
+            <button type="button" id="issueEquipBtn" class="block w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Issue Equipment</button>
+          </div>
+        </div>
+      </div>
+      <div id="toast" class="fixed bottom-4 right-4 hidden px-4 py-2 rounded shadow-lg z-50"></div>
+    </main>
+  </div>
+  <script src="/js/scan.js"></script>
+</body>
+</html>

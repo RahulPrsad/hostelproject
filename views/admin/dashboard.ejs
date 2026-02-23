@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/sidebar') %>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Total Students</p>
+          <p class="text-2xl font-semibold"><%= totalStudents %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Pending Leaves</p>
+          <p class="text-2xl font-semibold"><%= pendingLeaves %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Equipment Issued</p>
+          <p class="text-2xl font-semibold"><%= equipmentIssued %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Fruit This Week</p>
+          <p class="text-2xl font-semibold"><%= fruitThisWeek %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Open Complaints</p>
+          <p class="text-2xl font-semibold"><%= complaintCount %></p>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

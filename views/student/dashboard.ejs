@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/sidebar') %>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
+      <% } %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Recent Leaves</p>
+          <p class="text-2xl font-semibold"><%= leaves.length %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Equipment Issued</p>
+          <p class="text-2xl font-semibold"><%= equipment.length %></p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <p class="text-gray-600 text-sm">Fruit Received</p>
+          <p class="text-2xl font-semibold"><%= fruitCount %></p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="px-4 py-3 border-b font-semibold">Recent Leaves</div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="bg-gray-50 border-b"><th class="text-left p-2">From - To</th><th class="text-left p-2">Reason</th><th class="text-left p-2">Status</th></tr></thead>
+              <tbody>
+                <% leaves.forEach(l => { %>
+                  <tr class="border-b"><td class="p-2"><%= new Date(l.fromDate).toLocaleDateString() %> - <%= new Date(l.toDate).toLocaleDateString() %></td><td class="p-2"><%= l.reason %></td><td class="p-2"><span class="px-2 py-0.5 rounded text-xs <%= l.status === 'approved' ? 'bg-green-100 text-green-800' : l.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' %>"><%= l.status %></span></td></tr>
+                <% }); %>
+                <% if (leaves.length === 0) { %><tr><td colspan="3" class="p-4 text-gray-500">No leave applications</td></tr><% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="px-4 py-3 border-b font-semibold">Recent Complaints</div>
+          <div class="p-4 space-y-2">
+            <% complaints.forEach(c => { %>
+              <div class="border-l-4 pl-2 <%= c.status === 'resolved' ? 'border-green-500' : 'border-yellow-500' %>">
+                <p class="text-sm"><%= c.message %></p>
+                <p class="text-xs text-gray-500"><%= c.status %></p>
+              </div>
+            <% }); %>
+            <% if (complaints.length === 0) { %><p class="text-gray-500 text-sm">No complaints</p><% } %>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<aside class="w-56 bg-gray-800 text-white min-h-[calc(100vh-3.5rem)] py-4">
+  <nav class="space-y-1 px-2">
+    <% if (user && user.role === 'admin') { %>
+      <a href="/admin/dashboard" class="block px-3 py-2 rounded hover:bg-gray-700">Dashboard</a>
+      <a href="/admin/students" class="block px-3 py-2 rounded hover:bg-gray-700">Students</a>
+      <a href="/admin/leaves" class="block px-3 py-2 rounded hover:bg-gray-700">Leaves</a>
+      <a href="/admin/scan" class="block px-3 py-2 rounded hover:bg-gray-700">Scan QR</a>
+      <a href="/admin/fruit" class="block px-3 py-2 rounded hover:bg-gray-700">Issue Fruit</a>
+      <a href="/admin/equipment" class="block px-3 py-2 rounded hover:bg-gray-700">Equipment</a>
+      <a href="/admin/complaints" class="block px-3 py-2 rounded hover:bg-gray-700">Complaints</a>
+      <a href="/admin/report/weekly" class="block px-3 py-2 rounded hover:bg-gray-700" target="_blank">Weekly Report (PDF)</a>
+    <% } else if (user && user.role === 'student') { %>
+      <a href="/student/dashboard" class="block px-3 py-2 rounded hover:bg-gray-700">Dashboard</a>
+      <a href="/student/leave" class="block px-3 py-2 rounded hover:bg-gray-700">Apply Leave</a>
+      <a href="/student/complaint" class="block px-3 py-2 rounded hover:bg-gray-700">Raise Complaint</a>
+      <a href="/student/fruit-history" class="block px-3 py-2 rounded hover:bg-gray-700">Fruit History</a>
+      <a href="/student/equipment" class="block px-3 py-2 rounded hover:bg-gray-700">My Equipment</a>
+      <a href="/student/my-qr" class="block px-3 py-2 rounded hover:bg-gray-700">My QR Code</a>
+    <% } %>
+  </nav>
+</aside>

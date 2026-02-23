@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaints - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/sidebar') %>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Complaints</h1>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
+      <% } %>
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="p-4 space-y-4">
+          <% complaints.forEach(c => { %>
+            <div class="border-l-4 pl-4 <%= c.status === 'resolved' ? 'border-green-500' : 'border-yellow-500' %>">
+              <p class="text-gray-800"><%= c.message %></p>
+              <p class="text-sm text-gray-500">By <%= c.studentId ? c.studentId.name : 'N/A' %> (<%= c.studentId ? c.studentId.email : '' %>) · <%= new Date(c.createdAt).toLocaleString() %> · <%= c.status %></p>
+              <% if (c.status === 'open') { %>
+                <form action="/admin/complaints/<%= c._id %>/resolve" method="POST" class="mt-2"><button type="submit" class="text-indigo-600 hover:underline text-sm">Mark Resolved</button></form>
+              <% } %>
+            </div>
+          <% }); %>
+          <% if (complaints.length === 0) { %><p class="text-gray-500">No complaints</p><% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

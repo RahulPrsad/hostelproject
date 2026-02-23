@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply Leave - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/sidebar') %>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Apply for Leave</h1>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
+      <% } %>
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded"><%= error %></div>
+      <% } %>
+      <form action="/student/leave" method="POST" class="bg-white rounded-lg shadow p-6 max-w-md space-y-4 mb-8">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+          <input type="date" name="fromDate" required class="w-full px-3 py-2 border border-gray-300 rounded">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+          <input type="date" name="toDate" required class="w-full px-3 py-2 border border-gray-300 rounded">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+          <textarea name="reason" required rows="3" class="w-full px-3 py-2 border border-gray-300 rounded"></textarea>
+        </div>
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Submit</button>
+      </form>
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-4 py-3 border-b font-semibold">Leave Status</div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-2">From - To</th><th class="text-left p-2">Reason</th><th class="text-left p-2">Status</th></tr></thead>
+            <tbody>
+              <% leaves.forEach(l => { %>
+                <tr class="border-b"><td class="p-2"><%= new Date(l.fromDate).toLocaleDateString() %> - <%= new Date(l.toDate).toLocaleDateString() %></td><td class="p-2"><%= l.reason %></td><td class="p-2"><span class="px-2 py-0.5 rounded text-xs <%= l.status === 'approved' ? 'bg-green-100' : l.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100' %>"><%= l.status %></span></td></tr>
+              <% }); %>
+              <% if (leaves.length === 0) { %><tr><td colspan="3" class="p-4 text-gray-500">No applications yet</td></tr><% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

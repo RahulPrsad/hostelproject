@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Equipment - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/sidebar') %>
+    <main class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Issued Sports Equipment</h1>
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Equipment</th><th class="text-left p-3">Issue Date</th><th class="text-left p-3">Return Date</th><th class="text-left p-3">Damage</th></tr></thead>
+            <tbody>
+              <% equipment.forEach(e => { %>
+                <tr class="border-b">
+                  <td class="p-3"><%= e.equipmentName %></td>
+                  <td class="p-3"><%= new Date(e.issueDate).toLocaleDateString() %></td>
+                  <td class="p-3"><%= e.returnDate ? new Date(e.returnDate).toLocaleDateString() : '-' %></td>
+                  <td class="p-3"><%= e.damageStatus || '-' %></td>
+                </tr>
+              <% }); %>
+              <% if (equipment.length === 0) { %><tr><td colspan="4" class="p-4 text-gray-500">No equipment issued</td></tr><% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
