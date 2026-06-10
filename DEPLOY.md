@@ -1,8 +1,10 @@
 # Deploy QR Hostel Management
 
-## 1. Push code to GitHub
+After deployment, you do not run `server.js` on your laptop for normal use. Render runs the Node server online, MongoDB Atlas stores the data online, and the admin APK opens your Render URL.
 
-If the project is not a git repo yet:
+## 1. Push Code To GitHub
+
+If needed:
 
 ```bash
 git init
@@ -10,7 +12,7 @@ git add .
 git commit -m "Initial commit"
 ```
 
-Create a new repository on [GitHub](https://github.com/new), then:
+Create a new repository on GitHub, then:
 
 ```bash
 git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
@@ -18,39 +20,67 @@ git branch -M main
 git push -u origin main
 ```
 
-## 2. Set up MongoDB Atlas (free)
+## 2. Set Up MongoDB Atlas
 
-1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and sign up.
-2. Create a **free cluster** (M0).
-3. Under **Database Access** → Add user (username + password).
-4. Under **Network Access** → Add IP **0.0.0.0/0** (allow from anywhere for Render).
-5. Click **Connect** on the cluster → **Connect your application** → copy the connection string.  
-   It looks like: `mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/hostel_db?retryWrites=true&w=majority`  
-   Replace `<password>` with your DB user password and optionally change `hostel_db` to your DB name.
+1. Create a free MongoDB Atlas cluster.
+2. In Database Access, add a database user and password.
+3. In Network Access, add `0.0.0.0/0` so Render can connect.
+4. Copy the application connection string.
 
-## 3. Deploy on Render
+Example:
 
-1. Go to [Render](https://render.com) and sign up (or use GitHub login).
-2. **New** → **Web Service**.
-3. Connect your GitHub account and select the **qr-hostel-management** repo.
-4. Render will detect the app. If you added `render.yaml`, you can use **Apply** from the Blueprint; otherwise set:
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-5. In **Environment**, add these variables (use **Secret** for sensitive ones):
+```text
+mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/hostel_db?retryWrites=true&w=majority
+```
 
-   | Key | Value |
-   |-----|--------|
-   | `MONGODB_URI` | Your Atlas connection string |
-   | `JWT_SECRET` | A long random string (e.g. from a password generator) |
-   | `APP_URL` | `https://YOUR-SERVICE-NAME.onrender.com` (your Render URL) |
-   | `NODEMAILER_HOST` | `smtp.gmail.com` |
-   | `NODEMAILER_PORT` | `587` |
-   | `NODEMAILER_USER` | Your Gmail address |
-   | `NODEMAILER_PASS` | Gmail [App Password](https://support.google.com/accounts/answer/185833) (not your normal password) |
+## 3. Deploy On Render
 
-6. Click **Create Web Service**. Render will build and deploy; your app will be at `https://YOUR-SERVICE-NAME.onrender.com`.
+1. Go to Render.
+2. Create a new Web Service from your GitHub repo.
+3. Use:
 
-## 4. After first deploy
+```text
+Build Command: npm install
+Start Command: npm start
+```
 
-- **Seed admin (optional):** Run `npm run seed:admin` locally once with `MONGODB_URI` pointing to your Atlas database, or add a one-off script/route to seed the admin user in production.
-- Free tier spins down after ~15 min of no traffic; the first request may take 30–60 seconds to wake up.
+4. Add environment variables:
+
+| Key | Value |
+| --- | --- |
+| `MONGODB_URI` | Your MongoDB Atlas connection string |
+| `JWT_SECRET` | A long random secret |
+| `JWT_EXPIRE` | `7d` |
+| `APP_URL` | `https://YOUR-SERVICE-NAME.onrender.com` |
+| `NODEMAILER_HOST` | `smtp.gmail.com` |
+| `NODEMAILER_PORT` | `587` |
+| `NODEMAILER_USER` | Your Gmail address |
+| `NODEMAILER_PASS` | Your Gmail app password |
+| `ADMIN_EMAIL` | Admin email, for example `admin@hostel.com` |
+| `ADMIN_PASSWORD` | Admin password |
+
+## 4. Create The Admin User
+
+After the first deploy, open your Render service Shell and run:
+
+```bash
+npm run seed:admin
+```
+
+Then login here:
+
+```text
+https://YOUR-SERVICE-NAME.onrender.com/login
+```
+
+## 5. Use The Admin APK
+
+Open the APK and enter your deployed login URL:
+
+```text
+https://YOUR-SERVICE-NAME.onrender.com/login
+```
+
+Do not use `localhost` on the phone. `localhost` means the phone itself, not your deployed hostel server.
+
+On Render free tier, the first request can take 30 to 60 seconds if the service was sleeping.

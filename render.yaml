@@ -24,3 +24,7 @@ services:
         sync: false
       - key: NODEMAILER_PASS
         sync: false
+      - key: ADMIN_EMAIL
+        value: admin@hostel.com
+      - key: ADMIN_PASSWORD
+        sync: false
