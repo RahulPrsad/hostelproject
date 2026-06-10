@@ -53,6 +53,10 @@ APP_URL=https://YOUR-VERCEL-PROJECT.vercel.app
 
 ADMIN_EMAIL=admin@hostel.com
 ADMIN_PASSWORD=admin123
+
+AUTH_RATE_LIMIT_MAX=1000
+MONGODB_MAX_POOL_SIZE=10
+MONGODB_SERVER_SELECTION_TIMEOUT_MS=10000
 ```
 
 Replace:
@@ -62,6 +66,8 @@ Replace:
 - `YOUR-VERCEL-PROJECT` with your actual Vercel project URL.
 
 Do not add `PORT` on Vercel. Vercel manages the port.
+
+For around 500 users, keep `AUTH_RATE_LIMIT_MAX=1000` or higher. This limit now applies only to submitted auth forms, not normal page views.
 
 ## 4. Deploy
 
