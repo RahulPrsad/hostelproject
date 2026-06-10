@@ -1,86 +1,106 @@
-# Deploy QR Hostel Management
+# Deploy QR Hostel Management On Vercel
 
-After deployment, you do not run `server.js` on your laptop for normal use. Render runs the Node server online, MongoDB Atlas stores the data online, and the admin APK opens your Render URL.
+This project is now set up for Vercel.
+
+- Local development uses `server.js`.
+- Vercel uses `api/index.js`.
+- MongoDB Atlas stores the online data.
+- The admin APK must open the final Vercel URL, not `localhost`.
 
 ## 1. Push Code To GitHub
 
-If needed:
+From the project folder:
 
 ```bash
-git init
 git add .
-git commit -m "Initial commit"
+git commit -m "Configure Vercel deployment"
+git push origin main
 ```
 
-Create a new repository on GitHub, then:
+## 2. Import Project In Vercel
 
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git branch -M main
-git push -u origin main
-```
-
-## 2. Set Up MongoDB Atlas
-
-1. Create a free MongoDB Atlas cluster.
-2. In Database Access, add a database user and password.
-3. In Network Access, add `0.0.0.0/0` so Render can connect.
-4. Copy the application connection string.
-
-Example:
+1. Open Vercel.
+2. Click **Add New**.
+3. Click **Project**.
+4. Import `RahulPrsad/hostelproject`.
+5. Use these settings:
 
 ```text
-mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/hostel_db?retryWrites=true&w=majority
-```
-
-## 3. Deploy On Render
-
-1. Go to Render.
-2. Create a new Web Service from your GitHub repo.
-3. Use:
-
-```text
+Framework Preset: Other
+Root Directory: ./
 Build Command: npm install
-Start Command: npm start
+Output Directory: leave empty
+Install Command: npm install
 ```
 
-4. Add environment variables:
+Vercel will use `vercel.json` and route all requests to `api/index.js`.
 
-| Key | Value |
-| --- | --- |
-| `MONGODB_URI` | Your MongoDB Atlas connection string |
-| `JWT_SECRET` | A long random secret |
-| `JWT_EXPIRE` | `7d` |
-| `APP_URL` | `https://YOUR-SERVICE-NAME.onrender.com` |
-| `NODEMAILER_HOST` | `smtp.gmail.com` |
-| `NODEMAILER_PORT` | `587` |
-| `NODEMAILER_USER` | Your Gmail address |
-| `NODEMAILER_PASS` | Your Gmail app password |
-| `ADMIN_EMAIL` | Admin email, for example `admin@hostel.com` |
-| `ADMIN_PASSWORD` | Admin password |
+## 3. Add Environment Variables
 
-## 4. Create The Admin User
+In Vercel Project Settings, open **Environment Variables** and add:
 
-After the first deploy, open your Render service Shell and run:
+```env
+MONGODB_URI=mongodb+srv://prasadrr1_db_user:YOUR_DB_PASSWORD@hosteldb.iwsdhyz.mongodb.net/hostel_db?appName=hosteldb
+JWT_SECRET=8fK#92mLp$Xz7QvN1rTy@45AbCdEfGhJ
+JWT_EXPIRE=7d
+
+NODEMAILER_HOST=smtp.gmail.com
+NODEMAILER_PORT=587
+NODEMAILER_USER=rahulprasad9567@gmail.com
+NODEMAILER_PASS=YOUR_GMAIL_APP_PASSWORD
+
+APP_URL=https://YOUR-VERCEL-PROJECT.vercel.app
+
+ADMIN_EMAIL=admin@hostel.com
+ADMIN_PASSWORD=admin123
+```
+
+Replace:
+
+- `YOUR_DB_PASSWORD` with your MongoDB Atlas password.
+- `YOUR_GMAIL_APP_PASSWORD` with your Gmail app password.
+- `YOUR-VERCEL-PROJECT` with your actual Vercel project URL.
+
+Do not add `PORT` on Vercel. Vercel manages the port.
+
+## 4. Deploy
+
+Click **Deploy** in Vercel.
+
+After deployment, your web app will be available at:
+
+```text
+https://YOUR-VERCEL-PROJECT.vercel.app/login
+```
+
+## 5. Create Admin User
+
+Run the seed command once from your laptop using the same Atlas database:
 
 ```bash
 npm run seed:admin
 ```
 
-Then login here:
+This creates:
 
 ```text
-https://YOUR-SERVICE-NAME.onrender.com/login
+Email: admin@hostel.com
+Password: admin123
 ```
 
-## 5. Use The Admin APK
+## 6. Use The Admin APK
 
-Open the APK and enter your deployed login URL:
+Open the APK on the phone and enter:
 
 ```text
-https://YOUR-SERVICE-NAME.onrender.com/login
+https://YOUR-VERCEL-PROJECT.vercel.app/login
 ```
 
-Do not use `localhost` on the phone. `localhost` means the phone itself, not your deployed hostel server.
+Do not use:
 
-On Render free tier, the first request can take 30 to 60 seconds if the service was sleeping.
+```text
+localhost
+10.0.2.2
+```
+
+Those only work on a laptop or emulator, not on a real phone.
