@@ -38,7 +38,7 @@ A web-based hostel management system with QR-based student verification, role-ba
    NODEMAILER_PORT=587
    NODEMAILER_USER=your-email@gmail.com
    NODEMAILER_PASS=your-app-password
-   APP_URL=http://localhost:3000
+   APP_URL=https://hostelproject0409-rahulprsads-projects.vercel.app/login
    ```
 
    For Gmail: use an [App Password](https://support.google.com/accounts/answer/185833), not your normal password.
@@ -62,7 +62,7 @@ A web-based hostel management system with QR-based student verification, role-ba
    npm run dev
    ```
 
-   Open http://localhost:3000. Login as admin or register as a student.
+   Open your deployed URL. Login as admin or register as a student.
 
 ## Features
 

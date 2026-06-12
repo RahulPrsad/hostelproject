@@ -49,7 +49,7 @@ NODEMAILER_PORT=587
 NODEMAILER_USER=rahulprasad9567@gmail.com
 NODEMAILER_PASS=YOUR_GMAIL_APP_PASSWORD
 
-APP_URL=https://YOUR-VERCEL-PROJECT.vercel.app
+APP_URL=https://hostelproject0409-rahulprsads-projects.vercel.app/login
 
 ADMIN_EMAIL=admin@hostel.com
 ADMIN_PASSWORD=admin123
@@ -63,7 +63,7 @@ Replace:
 
 - `YOUR_DB_PASSWORD` with your MongoDB Atlas password.
 - `YOUR_GMAIL_APP_PASSWORD` with your Gmail app password.
-- `YOUR-VERCEL-PROJECT` with your actual Vercel project URL.
+- `APP_URL` should point to your live login page.
 
 Do not add `PORT` on Vercel. Vercel manages the port.
 
@@ -76,7 +76,7 @@ Click **Deploy** in Vercel.
 After deployment, your web app will be available at:
 
 ```text
-https://YOUR-VERCEL-PROJECT.vercel.app/login
+https://hostelproject0409-rahulprsads-projects.vercel.app/login
 ```
 
 ## 5. Create Admin User
@@ -99,7 +99,7 @@ Password: admin123
 Open the APK on the phone and enter:
 
 ```text
-https://YOUR-VERCEL-PROJECT.vercel.app/login
+https://hostelproject0409-rahulprsads-projects.vercel.app/login
 ```
 
 Do not use:
