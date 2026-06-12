@@ -49,7 +49,7 @@ NODEMAILER_PORT=587
 NODEMAILER_USER=rahulprasad9567@gmail.com
 NODEMAILER_PASS=YOUR_GMAIL_APP_PASSWORD
 
-APP_URL=https://hostelproject0409-rahulprsads-projects.vercel.app/login
+APP_URL=https://hostelproject-omega.vercel.app/login
 
 ADMIN_EMAIL=admin@hostel.com
 ADMIN_PASSWORD=admin123
@@ -76,7 +76,7 @@ Click **Deploy** in Vercel.
 After deployment, your web app will be available at:
 
 ```text
-https://hostelproject0409-rahulprsads-projects.vercel.app/login
+https://hostelproject-omega.vercel.app/login
 ```
 
 ## 5. Create Admin User
@@ -99,7 +99,7 @@ Password: admin123
 Open the APK on the phone and enter:
 
 ```text
-https://hostelproject0409-rahulprsads-projects.vercel.app/login
+https://hostelproject-omega.vercel.app/login
 ```
 
 Do not use:
