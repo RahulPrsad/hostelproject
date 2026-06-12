@@ -9,17 +9,17 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
-  <div class="flex flex-1 flex-col md:flex-row">
+  <div class="flex flex-1 flex-col items-stretch md:flex-row">
     <%- include('../partials/sidebar') %>
-    <main class="flex-1 p-6">
+    <main class="min-w-0 flex-1 p-4 md:p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">Scan Student QR</h1>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <div id="reader" class="w-full"></div>
           <button type="button" id="startBtn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Start Camera</button>
           <button type="button" id="stopBtn" class="mt-2 ml-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" style="display:none">Stop</button>
         </div>
-        <div id="studentCard" class="bg-white rounded-lg shadow p-6 hidden">
+        <div id="studentCard" class="rounded-lg bg-white p-6 shadow hidden">
           <h2 class="font-semibold text-lg mb-2">Student Details</h2>
           <p id="sName" class="text-gray-800"></p>
           <p id="sEmail" class="text-gray-600 text-sm"></p>

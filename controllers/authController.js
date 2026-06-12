@@ -62,7 +62,7 @@ exports.postRegister = async (req, res) => {
       return res.redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
     }
     if (existing.role === 'student' && existing.approvalStatus === 'pending') {
-      return res.render('register', { error: 'Your registration is already waiting for admin approval' });
+      return res.render('auth/register', { error: 'Your registration is already waiting for admin approval' });
     }
     return res.render('auth/register', { error: 'Email already registered' });
   }
@@ -100,6 +100,13 @@ exports.getVerifyOTP = (req, res) => {
   res.render('auth/verifyOTP', { email, error: null, noEmail });
 };
 
+exports.getThankYou = (req, res) => {
+  res.render('auth/thankYou', {
+    email: req.query.email || '',
+    name: req.query.name || '',
+  });
+};
+
 exports.postVerifyOTP = async (req, res) => {
   const { email, otp } = req.body;
   const user = await Student.findOne({ email });
@@ -121,7 +128,10 @@ exports.postVerifyOTP = async (req, res) => {
     user.approvalStatus = 'pending';
   }
   await user.save();
-  return res.redirect('/login?success=Email verified. Your request is now waiting for admin approval.');
+  return res.render('auth/thankYou', {
+    email,
+    name: user.name,
+  });
 };
 
 exports.logout = (req, res) => {

@@ -8,9 +8,9 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
-  <div class="flex flex-1 flex-col md:flex-row">
+  <div class="flex flex-1 flex-col items-stretch md:flex-row">
     <%- include('../partials/sidebar') %>
-    <main class="flex-1 p-6">
+    <main class="min-w-0 flex-1 p-4 md:p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">All Students</h1>
       <% if (typeof success !== 'undefined' && success) { %>
         <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
@@ -43,17 +43,19 @@
                     <% } %>
                   </td>
                   <td class="p-3"><% if (s.parentPhone) { %><a href="tel:<%= s.parentPhone %>" class="text-indigo-600 hover:underline">Call Parent</a><% } else { %>-<% } %></td>
-                  <td class="p-3">
-                    <% if (s.isVerified && status !== 'approved') { %>
-                      <form action="/admin/students/<%= s._id %>/approve" method="POST" class="inline">
-                        <button class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
-                      </form>
-                    <% } %>
-                    <% if (status !== 'rejected') { %>
-                      <form action="/admin/students/<%= s._id %>/reject" method="POST" class="inline ml-2">
-                        <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
-                      </form>
-                    <% } %>
+                  <td class="p-3 align-top">
+                    <div class="flex flex-wrap gap-2">
+                      <% if (s.isVerified && status !== 'approved') { %>
+                        <form action="/admin/students/<%= s._id %>/approve" method="POST" class="inline">
+                          <button class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
+                        </form>
+                      <% } %>
+                      <% if (status !== 'rejected') { %>
+                        <form action="/admin/students/<%= s._id %>/reject" method="POST" class="inline">
+                          <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
+                        </form>
+                      <% } %>
+                    </div>
                   </td>
                 </tr>
               <% }); %>

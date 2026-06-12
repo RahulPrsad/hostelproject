@@ -8,23 +8,23 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
-  <div class="flex flex-1 flex-col md:flex-row">
+  <div class="flex flex-1 flex-col items-stretch md:flex-row">
     <%- include('../partials/sidebar') %>
-    <main class="flex-1 p-6">
+    <main class="min-w-0 flex-1 p-4 md:p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
       <% if (typeof success !== 'undefined' && success) { %>
         <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
       <% } %>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div class="bg-white rounded-lg shadow p-4">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-8">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Recent Leaves</p>
           <p class="text-2xl font-semibold"><%= leaves.length %></p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Equipment Issued</p>
           <p class="text-2xl font-semibold"><%= equipment.length %></p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Fruit Received</p>
           <p class="text-2xl font-semibold"><%= fruitCount %></p>
         </div>

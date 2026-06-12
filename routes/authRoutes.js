@@ -28,6 +28,7 @@ router.post('/register', authLimiter, [
 
 router.get('/verify-otp', authController.getVerifyOTP);
 router.post('/verify-otp', authLimiter, authController.postVerifyOTP);
+router.get('/thank-you', authController.getThankYou);
 
 router.get('/logout', authController.logout);
 router.post('/logout', authController.logout);

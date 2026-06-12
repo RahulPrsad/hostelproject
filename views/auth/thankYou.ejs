@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're All Set - Hostel Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+  <div class="w-full max-w-xl">
+    <div class="rounded-3xl bg-white p-8 shadow-lg border border-slate-200">
+      <div class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700 mb-4">Verified</div>
+      <h1 class="text-3xl font-bold text-slate-900 mb-3">You are all set</h1>
+      <p class="text-slate-600 text-base leading-7 mb-6">
+        Thanks, <%= typeof name !== 'undefined' ? name : 'student' %>. Your email has been verified.
+        The admin will approve your registration next. After approval, you can log in and use the hostel portal.
+      </p>
+      <div class="rounded-2xl bg-slate-100 p-4 text-sm text-slate-700 mb-6">
+        <p class="font-semibold text-slate-900 mb-1">What happens next</p>
+        <p>Your request stays pending until an admin approves it from the Students section.</p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <a href="/login" class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-white font-medium hover:bg-indigo-700">
+          Go to Login
+        </a>
+        <a href="/register" class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-5 py-3 text-slate-700 hover:bg-slate-50">
+          Register another user
+        </a>
+      </div>
+      <% if (typeof email !== 'undefined' && email) { %>
+        <p class="mt-6 text-xs text-slate-500">Verified email: <%= email %></p>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

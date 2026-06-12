@@ -8,32 +8,32 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
-  <div class="flex flex-1 flex-col md:flex-row">
+  <div class="flex flex-1 flex-col items-stretch md:flex-row">
     <%- include('../partials/sidebar') %>
-    <main class="flex-1 p-6">
+    <main class="min-w-0 flex-1 p-4 md:p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        <div class="bg-white rounded-lg shadow p-4">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Total Students</p>
           <p class="text-2xl font-semibold"><%= totalStudents %></p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Pending Students</p>
           <p class="text-2xl font-semibold"><%= pendingStudents %></p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Pending Leaves</p>
           <p class="text-2xl font-semibold"><%= pendingLeaves %></p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Equipment Issued</p>
           <p class="text-2xl font-semibold"><%= equipmentIssued %></p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Fruit This Week</p>
           <p class="text-2xl font-semibold"><%= fruitThisWeek %></p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Open Complaints</p>
           <p class="text-2xl font-semibold"><%= complaintCount %></p>
         </div>

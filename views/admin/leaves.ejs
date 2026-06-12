@@ -8,9 +8,9 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
-  <div class="flex flex-1 flex-col md:flex-row">
+  <div class="flex flex-1 flex-col items-stretch md:flex-row">
     <%- include('../partials/sidebar') %>
-    <main class="flex-1 p-6">
+    <main class="min-w-0 flex-1 p-4 md:p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">Leave Applications</h1>
       <% if (typeof success !== 'undefined' && success) { %>
         <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
@@ -26,10 +26,12 @@
                   <td class="p-3"><%= new Date(l.fromDate).toLocaleDateString() %> - <%= new Date(l.toDate).toLocaleDateString() %></td>
                   <td class="p-3"><%= l.reason %></td>
                   <td class="p-3"><span class="px-2 py-0.5 rounded text-xs <%= l.status === 'approved' ? 'bg-green-100' : l.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100' %>"><%= l.status %></span></td>
-                  <td class="p-3">
+                  <td class="p-3 align-top">
                     <% if (l.status === 'pending') { %>
-                      <form action="/admin/leaves/<%= l._id %>/approve" method="POST" class="inline"><button type="submit" class="text-green-600 hover:underline mr-2">Approve</button></form>
-                      <form action="/admin/leaves/<%= l._id %>/reject" method="POST" class="inline"><button type="submit" class="text-red-600 hover:underline">Reject</button></form>
+                      <div class="flex flex-wrap gap-2">
+                        <form action="/admin/leaves/<%= l._id %>/approve" method="POST" class="inline"><button type="submit" class="text-green-600 hover:underline">Approve</button></form>
+                        <form action="/admin/leaves/<%= l._id %>/reject" method="POST" class="inline"><button type="submit" class="text-red-600 hover:underline">Reject</button></form>
+                      </div>
                     <% } else { %>-<% } %>
                   </td>
                 </tr>
