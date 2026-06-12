@@ -10,8 +10,9 @@ exports.dashboard = async (req, res) => {
   const startOfWeek = new Date();
   startOfWeek.setHours(0, 0, 0, 0);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-  const [totalStudents, pendingLeaves, equipmentIssued, fruitThisWeek, complaintCount] = await Promise.all([
-    Student.countDocuments({ role: 'student' }),
+  const [totalStudents, pendingStudents, pendingLeaves, equipmentIssued, fruitThisWeek, complaintCount] = await Promise.all([
+    Student.countDocuments({ role: 'student', approvalStatus: { $ne: 'rejected' } }),
+    Student.countDocuments({ role: 'student', isVerified: true, approvalStatus: 'pending' }),
     Leave.countDocuments({ status: 'pending' }),
     Equipment.countDocuments({ returnDate: null }),
     FruitDistribution.countDocuments({ date: { $gte: startOfWeek } }),
@@ -20,6 +21,7 @@ exports.dashboard = async (req, res) => {
   res.render('admin/dashboard', {
     user: req.user,
     totalStudents,
+    pendingStudents,
     pendingLeaves,
     equipmentIssued,
     fruitThisWeek,
@@ -31,7 +33,30 @@ exports.dashboard = async (req, res) => {
 
 exports.students = async (req, res) => {
   const students = await Student.find({ role: 'student' }).select('-password -otp -qrCode').sort({ createdAt: -1 });
-  res.render('admin/students', { user: req.user, students, navbar: true, sidebar: true });
+  res.render('admin/students', { user: req.user, students, success: req.query.success, error: req.query.error, navbar: true, sidebar: true });
+};
+
+exports.approveStudent = async (req, res) => {
+  const student = await Student.findOne({ _id: req.params.id, role: 'student' });
+  if (!student) return res.redirect('/admin/students?error=Student not found');
+  if (!student.isVerified) return res.redirect('/admin/students?error=Student must verify OTP before approval');
+
+  student.approvalStatus = 'approved';
+  student.approvedAt = new Date();
+  student.approvedBy = req.user._id;
+  await student.save();
+  return res.redirect('/admin/students?success=Student approved');
+};
+
+exports.rejectStudent = async (req, res) => {
+  const student = await Student.findOne({ _id: req.params.id, role: 'student' });
+  if (!student) return res.redirect('/admin/students?error=Student not found');
+
+  student.approvalStatus = 'rejected';
+  student.approvedAt = null;
+  student.approvedBy = null;
+  await student.save();
+  return res.redirect('/admin/students?success=Student rejected');
 };
 
 exports.leaves = async (req, res) => {

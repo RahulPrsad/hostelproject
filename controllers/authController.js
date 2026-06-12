@@ -32,6 +32,15 @@ exports.postLogin = async (req, res) => {
   if (!user.isVerified) {
     return res.render('auth/login', { error: 'Please verify your email with OTP first', success: null });
   }
+  if (user.role === 'student') {
+    const approvalStatus = user.approvalStatus || 'approved';
+    if (approvalStatus === 'pending') {
+      return res.render('auth/login', { error: 'Your registration is verified and waiting for admin approval', success: null });
+    }
+    if (approvalStatus === 'rejected') {
+      return res.render('auth/login', { error: 'Your registration was rejected. Please contact the hostel admin.', success: null });
+    }
+  }
   const token = generateToken(user._id, user.role);
   res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
   return res.redirect(user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard');
@@ -49,6 +58,12 @@ exports.postRegister = async (req, res) => {
   const { name, email, password, parentName, parentPhone, branch, year } = req.body;
   const existing = await Student.findOne({ email });
   if (existing) {
+    if (existing.role === 'student' && !existing.isVerified) {
+      return res.redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
+    }
+    if (existing.role === 'student' && existing.approvalStatus === 'pending') {
+      return res.render('register', { error: 'Your registration is already waiting for admin approval' });
+    }
     return res.render('auth/register', { error: 'Email already registered' });
   }
   const otp = String(Math.floor(100000 + Math.random() * 900000));
@@ -62,6 +77,7 @@ exports.postRegister = async (req, res) => {
     branch: branch || '',
     year: year || '',
     role: 'student',
+    approvalStatus: 'pending',
     isVerified: false,
     otp,
     otpExpires,
@@ -101,8 +117,11 @@ exports.postVerifyOTP = async (req, res) => {
   user.otpExpires = null;
   const qrDataURL = await generateQRDataURL(user._id.toString());
   user.qrCode = qrDataURL;
+  if (!user.approvalStatus) {
+    user.approvalStatus = 'pending';
+  }
   await user.save();
-  return res.redirect('/login?success=Verified. You can login now.');
+  return res.redirect('/login?success=Email verified. Your request is now waiting for admin approval.');
 };
 
 exports.logout = (req, res) => {

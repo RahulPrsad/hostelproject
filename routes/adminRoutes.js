@@ -11,6 +11,8 @@ router.use(requireAdmin);
 
 router.get('/dashboard', adminController.dashboard);
 router.get('/students', adminController.students);
+router.post('/students/:id/approve', adminController.approveStudent);
+router.post('/students/:id/reject', adminController.rejectStudent);
 router.get('/leaves', adminController.leaves);
 router.post('/leaves/:id/approve', adminController.approveLeave);
 router.post('/leaves/:id/reject', adminController.rejectLeave);

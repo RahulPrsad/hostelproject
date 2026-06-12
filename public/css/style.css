@@ -1,2 +1,11 @@
 /* Hostel Management - minimal overrides */
 input:invalid { box-shadow: none; }
+
+body {
+  color: #0f172a;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}

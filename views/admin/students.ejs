@@ -6,16 +6,22 @@
   <title>Students - Hostel Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
-  <div class="flex">
+  <div class="flex flex-1 flex-col md:flex-row">
     <%- include('../partials/sidebar') %>
     <main class="flex-1 p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">All Students</h1>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
+      <% } %>
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded"><%= error %></div>
+      <% } %>
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Name</th><th class="text-left p-3">Email</th><th class="text-left p-3">Branch</th><th class="text-left p-3">Year</th><th class="text-left p-3">Parent</th><th class="text-left p-3">Call</th></tr></thead>
+            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Name</th><th class="text-left p-3">Email</th><th class="text-left p-3">Branch</th><th class="text-left p-3">Year</th><th class="text-left p-3">Parent</th><th class="text-left p-3">Status</th><th class="text-left p-3">Call</th><th class="text-left p-3">Action</th></tr></thead>
             <tbody>
               <% students.forEach(s => { %>
                 <tr class="border-b">
@@ -24,15 +30,40 @@
                   <td class="p-3"><%= s.branch || '-' %></td>
                   <td class="p-3"><%= s.year || '-' %></td>
                   <td class="p-3"><%= s.parentName || '-' %></td>
+                  <td class="p-3">
+                    <% const status = s.approvalStatus || 'approved'; %>
+                    <% if (!s.isVerified) { %>
+                      <span class="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs">OTP pending</span>
+                    <% } else if (status === 'approved') { %>
+                      <span class="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">Approved</span>
+                    <% } else if (status === 'rejected') { %>
+                      <span class="px-2 py-1 rounded bg-red-100 text-red-800 text-xs">Rejected</span>
+                    <% } else { %>
+                      <span class="px-2 py-1 rounded bg-indigo-100 text-indigo-800 text-xs">Approval pending</span>
+                    <% } %>
+                  </td>
                   <td class="p-3"><% if (s.parentPhone) { %><a href="tel:<%= s.parentPhone %>" class="text-indigo-600 hover:underline">Call Parent</a><% } else { %>-<% } %></td>
+                  <td class="p-3">
+                    <% if (s.isVerified && status !== 'approved') { %>
+                      <form action="/admin/students/<%= s._id %>/approve" method="POST" class="inline">
+                        <button class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
+                      </form>
+                    <% } %>
+                    <% if (status !== 'rejected') { %>
+                      <form action="/admin/students/<%= s._id %>/reject" method="POST" class="inline ml-2">
+                        <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
+                      </form>
+                    <% } %>
+                  </td>
                 </tr>
               <% }); %>
-              <% if (students.length === 0) { %><tr><td colspan="6" class="p-4 text-gray-500">No students</td></tr><% } %>
+              <% if (students.length === 0) { %><tr><td colspan="8" class="p-4 text-gray-500">No students</td></tr><% } %>
             </tbody>
           </table>
         </div>
       </div>
     </main>
   </div>
+  <%- include('../partials/footer') %>
 </body>
 </html>
