@@ -61,7 +61,21 @@ exports.fruitHistory = async (req, res) => {
 
 exports.equipment = async (req, res) => {
   const equipment = await Equipment.find({ studentId: req.user._id }).sort({ issueDate: -1 });
-  res.render('student/equipment', { user: req.user, equipment, navbar: true, sidebar: true });
+  res.render('student/equipment', { user: req.user, equipment, success: req.query.success, error: req.query.error, navbar: true, sidebar: true });
+};
+
+exports.returnEquipment = async (req, res) => {
+  const equipment = await Equipment.findOne({ _id: req.params.id, studentId: req.user._id, returnDate: null });
+  if (!equipment) return res.redirect('/student/equipment?error=Active equipment record not found');
+
+  const damagePercentage = req.body.damagePercentage === '' || req.body.damagePercentage === undefined ? null : Number(req.body.damagePercentage);
+  equipment.returnDate = new Date();
+  equipment.returnPhoto = req.body.returnPhoto || '';
+  equipment.damagePercentage = damagePercentage;
+  equipment.damageStatus = damagePercentage === null ? 'Returned' : `${damagePercentage}% predicted damage`;
+  await equipment.save();
+
+  return res.redirect('/student/equipment?success=Equipment submitted with damage prediction');
 };
 
 exports.myQR = (req, res) => {
