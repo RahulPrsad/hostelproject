@@ -28,9 +28,24 @@
           <p class="mt-2">Parent: <a id="sParentLink" href="#" class="text-indigo-600 hover:underline">Call Parent</a></p>
           <input type="hidden" id="studentId" value="">
           <input type="file" id="equipmentPhotoInput" accept="image/*" capture="environment" class="hidden">
+          <input type="file" id="returnEquipmentPhotoInput" accept="image/*" capture="environment" class="hidden">
           <div class="mt-4 space-y-2">
             <button type="button" id="issueFruitBtn" class="block w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Issue Fruit</button>
             <button type="button" id="issueEquipBtn" class="block w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Issue Equipment</button>
+          </div>
+          <div class="mt-6 border-t pt-4">
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <h3 class="font-semibold text-gray-800">Return Equipment</h3>
+              <button type="button" id="refreshEquipmentBtn" class="text-sm text-indigo-600 hover:underline">Refresh</button>
+            </div>
+            <div id="activeEquipmentList" class="space-y-3 text-sm text-gray-600">Scan a student to view active equipment.</div>
+          </div>
+          <div id="returnResultPanel" class="mt-4 hidden rounded border border-amber-200 bg-amber-50 p-4">
+            <p id="returnResultText" class="text-sm font-medium text-amber-900"></p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button type="button" id="agreeReturnBtn" class="rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">Agree</button>
+              <button type="button" id="cancelReturnBtn" class="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-white">Close</button>
+            </div>
           </div>
         </div>
       </div>
