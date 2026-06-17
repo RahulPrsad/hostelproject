@@ -42,7 +42,12 @@
                       <span class="px-2 py-1 rounded bg-indigo-100 text-indigo-800 text-xs">Approval pending</span>
                     <% } %>
                   </td>
-                  <td class="p-3"><% if (s.parentPhone) { %><a href="tel:<%= s.parentPhone %>" class="text-indigo-600 hover:underline">Call Parent</a><% } else { %>-<% } %></td>
+                  <td class="p-3">
+                    <% if (s.parentPhone) { %>
+                      <% const parentDialNumber = String(s.parentPhone).replace(/[^\d+]/g, ''); %>
+                      <a href="tel:<%= parentDialNumber %>" class="text-indigo-600 hover:underline">Call Parent</a>
+                    <% } else { %>-<% } %>
+                  </td>
                   <td class="p-3 align-top">
                     <div class="flex flex-wrap gap-2">
                       <% if (s.isVerified && status !== 'approved') { %>

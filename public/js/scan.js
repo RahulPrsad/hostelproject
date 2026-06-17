@@ -36,12 +36,17 @@
     setTimeout(function () { toast.classList.add('hidden'); }, 3000);
   }
 
+  function getDialNumber(phone) {
+    return String(phone || '').replace(/[^\d+]/g, '');
+  }
+
   function showStudent(data) {
     sName.textContent = data.name;
     sEmail.textContent = data.email;
     sBranch.textContent = 'Branch: ' + (data.branch || '-');
     sYear.textContent = 'Year: ' + (data.year || '-');
-    sParentLink.href = data.parentPhone ? 'tel:' + data.parentPhone : '#';
+    var dialNumber = getDialNumber(data.parentPhone);
+    sParentLink.href = dialNumber ? 'tel:' + dialNumber : '#';
     sParentLink.textContent = data.parentPhone ? data.parentPhone : 'N/A';
     studentIdInput.value = data._id;
     studentCard.classList.remove('hidden');
