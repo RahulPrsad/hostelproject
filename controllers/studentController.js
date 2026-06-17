@@ -3,8 +3,10 @@ const Equipment = require('../models/Equipment');
 const FruitDistribution = require('../models/FruitDistribution');
 const Complaint = require('../models/Complaint');
 const { validationResult } = require('express-validator');
+const { cleanupExpiredEquipmentPhotos, getPhotoExpiryDate } = require('../utils/equipmentPhotoRetention');
 
 exports.dashboard = async (req, res) => {
+  await cleanupExpiredEquipmentPhotos();
   const studentId = req.user._id;
   const [leaves, equipment, fruitCount, complaints] = await Promise.all([
     Leave.find({ studentId }).sort({ createdAt: -1 }).limit(5),
@@ -60,6 +62,7 @@ exports.fruitHistory = async (req, res) => {
 };
 
 exports.equipment = async (req, res) => {
+  await cleanupExpiredEquipmentPhotos();
   const equipment = await Equipment.find({ studentId: req.user._id }).sort({ issueDate: -1 });
   res.render('student/equipment', { user: req.user, equipment, success: req.query.success, error: req.query.error, navbar: true, sidebar: true });
 };
@@ -68,14 +71,14 @@ exports.returnEquipment = async (req, res) => {
   const equipment = await Equipment.findOne({ _id: req.params.id, studentId: req.user._id, returnDate: null });
   if (!equipment) return res.redirect('/student/equipment?error=Active equipment record not found');
 
-  const damagePercentage = req.body.damagePercentage === '' || req.body.damagePercentage === undefined ? null : Number(req.body.damagePercentage);
-  equipment.returnDate = new Date();
+  const returnedAt = new Date();
+  equipment.returnDate = returnedAt;
   equipment.returnPhoto = req.body.returnPhoto || '';
-  equipment.damagePercentage = damagePercentage;
-  equipment.damageStatus = damagePercentage === null ? 'Returned' : `${damagePercentage}% predicted damage`;
+  equipment.photosExpireAt = getPhotoExpiryDate(returnedAt);
+  equipment.damageStatus = 'Returned';
   await equipment.save();
 
-  return res.redirect('/student/equipment?success=Equipment submitted with damage prediction');
+  return res.redirect('/student/equipment?success=Equipment submitted');
 };
 
 exports.myQR = (req, res) => {
