@@ -13,7 +13,6 @@
   const issueFruitBtn = document.getElementById('issueFruitBtn');
   const issueEquipBtn = document.getElementById('issueEquipBtn');
   const toast = document.getElementById('toast');
-  const equipmentPhotoInput = document.getElementById('equipmentPhotoInput');
 
   function showToast(msg, isError) {
     toast.textContent = msg;
@@ -86,8 +85,7 @@
       body: JSON.stringify({ studentId: id, quantity: 1 })
     }).then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data.success && data.redirectUrl) window.location.href = data.redirectUrl;
-        else if (data.success) showToast('Fruit issued');
+        if (data.success) showToast('Fruit issued');
         else showToast(data.error || 'Failed', true);
       })
       .catch(function () { showToast('Request failed', true); });
@@ -98,25 +96,15 @@
     if (!id) { showToast('No student selected', true); return; }
     var name = window.prompt('Equipment name:');
     if (!name) return;
-    equipmentPhotoInput.value = '';
-    equipmentPhotoInput.onchange = function () {
-      var file = equipmentPhotoInput.files && equipmentPhotoInput.files[0];
-      var photoPromise = file && window.EquipmentDamageModel ? window.EquipmentDamageModel.compressImage(file) : Promise.resolve('');
-      photoPromise.then(function (issuePhoto) {
-        fetch('/admin/equipment/qr', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId: id, equipmentName: name, issuePhoto: issuePhoto })
-        }).then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (data && data.success) showToast('Equipment issued');
-            else showToast((data && data.error) || 'Failed', true);
-          })
-          .catch(function () { showToast('Request failed', true); });
-      }).catch(function () {
-        showToast('Could not read equipment image', true);
-      });
-    };
-    equipmentPhotoInput.click();
+    fetch('/admin/equipment/qr', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ studentId: id, equipmentName: name })
+    }).then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.success) showToast('Equipment issued');
+        else showToast((data && data.error) || 'Failed', true);
+      })
+      .catch(function () { showToast('Request failed', true); });
   });
 })();

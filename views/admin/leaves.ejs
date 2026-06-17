@@ -22,27 +22,14 @@
             <tbody>
               <% leaves.forEach(l => { %>
                 <tr class="border-b">
-                  <td class="p-3">
-                    <%= l.studentId ? l.studentId.name : 'N/A' %><br>
-                    <span class="text-gray-500 text-xs"><%= l.studentId ? l.studentId.email : '' %></span>
-                    <% if (l.studentId && l.studentId.parentPhone) { %>
-                      <br><span class="text-gray-500 text-xs">Parent: <%= l.studentId.parentName || 'Parent' %> · <%= l.studentId.parentPhone %></span>
-                    <% } %>
-                  </td>
+                  <td class="p-3"><%= l.studentId ? l.studentId.name : 'N/A' %><br><span class="text-gray-500 text-xs"><%= l.studentId ? l.studentId.email : '' %></span></td>
                   <td class="p-3"><%= new Date(l.fromDate).toLocaleDateString() %> - <%= new Date(l.toDate).toLocaleDateString() %></td>
                   <td class="p-3"><%= l.reason %></td>
                   <td class="p-3"><span class="px-2 py-0.5 rounded text-xs <%= l.status === 'approved' ? 'bg-green-100' : l.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100' %>"><%= l.status %></span></td>
                   <td class="p-3 align-top">
                     <% if (l.status === 'pending') { %>
                       <div class="flex flex-wrap gap-2">
-                        <% if (l.studentId && l.studentId.parentPhone) { %>
-                          <a href="tel:<%= l.studentId.parentPhone %>" data-call-parent-for="<%= l._id %>" class="text-indigo-600 hover:underline">Call Parent</a>
-                        <% } else { %>
-                          <span class="text-xs text-gray-500">No parent phone</span>
-                        <% } %>
-                        <form action="/admin/leaves/<%= l._id %>/approve" method="POST" class="inline">
-                          <button type="submit" data-approve-leave="<%= l._id %>" <%= l.studentId && l.studentId.parentPhone ? 'disabled' : '' %> class="text-green-600 hover:underline disabled:text-gray-400 disabled:no-underline">Approve</button>
-                        </form>
+                        <form action="/admin/leaves/<%= l._id %>/approve" method="POST" class="inline"><button type="submit" class="text-green-600 hover:underline">Approve</button></form>
                         <form action="/admin/leaves/<%= l._id %>/reject" method="POST" class="inline"><button type="submit" class="text-red-600 hover:underline">Reject</button></form>
                       </div>
                     <% } else { %>-<% } %>
@@ -57,14 +44,5 @@
     </main>
   </div>
   <%- include('../partials/footer') %>
-  <script>
-    document.querySelectorAll('[data-call-parent-for]').forEach(function (link) {
-      link.addEventListener('click', function () {
-        var id = link.getAttribute('data-call-parent-for');
-        var approve = document.querySelector('[data-approve-leave="' + id + '"]');
-        if (approve) approve.disabled = false;
-      });
-    });
-  </script>
 </body>
 </html>

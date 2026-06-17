@@ -27,43 +27,22 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Equipment Name</label>
           <input type="text" name="equipmentName" required class="w-full px-3 py-2 border border-gray-300 rounded" placeholder="e.g. Cricket Bat">
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Issue Photo</label>
-          <input type="file" accept="image/*" capture="environment" data-equipment-issue-input class="w-full text-sm">
-          <input type="hidden" name="issuePhoto" data-equipment-issue-photo>
-          <img data-equipment-issue-preview alt="Equipment issue preview" class="hidden mt-2 h-28 w-28 rounded object-cover border">
-        </div>
         <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Issue Equipment</button>
       </form>
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Student</th><th class="text-left p-3">Equipment</th><th class="text-left p-3">Photo</th><th class="text-left p-3">Issue Date</th><th class="text-left p-3">Return</th><th class="text-left p-3">Damage</th></tr></thead>
+            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Student</th><th class="text-left p-3">Equipment</th><th class="text-left p-3">Issue Date</th><th class="text-left p-3">Return</th><th class="text-left p-3">Damage</th></tr></thead>
             <tbody>
               <% equipment.forEach(e => { %>
                 <tr class="border-b">
                   <td class="p-3"><%= e.studentId ? e.studentId.name : 'N/A' %></td>
                   <td class="p-3"><%= e.equipmentName %></td>
-                  <td class="p-3">
-                    <% if (e.issuePhoto) { %>
-                      <img src="<%= e.issuePhoto %>" alt="Issued <%= e.equipmentName %>" class="h-14 w-14 rounded object-cover border">
-                    <% } else { %>-<% } %>
-                  </td>
                   <td class="p-3"><%= new Date(e.issueDate).toLocaleDateString() %></td>
                   <td class="p-3 align-top">
                     <% if (!e.returnDate) { %>
-                      <form action="/admin/equipment/<%= e._id %>/return" method="POST" class="space-y-2">
-                        <input type="hidden" data-existing-issue-photo value="<%= e.issuePhoto || '' %>">
-                        <input type="hidden" name="returnPhoto" data-equipment-return-photo>
-                        <input type="hidden" name="damagePercentage" data-equipment-damage-percent>
-                        <input type="file" accept="image/*" capture="environment" data-equipment-return-input class="w-40 text-xs">
-                        <p data-equipment-damage-result class="hidden text-xs font-medium text-amber-700"></p>
-                        <button type="submit" class="text-green-600 hover:underline">Mark Return</button>
-                      </form>
-                    <% } else { %>
-                      <%= new Date(e.returnDate).toLocaleDateString() %>
-                      <% if (e.returnPhoto) { %><img src="<%= e.returnPhoto %>" alt="Returned <%= e.equipmentName %>" class="mt-2 h-14 w-14 rounded object-cover border"><% } %>
-                    <% } %>
+                      <form action="/admin/equipment/<%= e._id %>/return" method="POST" class="inline"><button type="submit" class="text-green-600 hover:underline">Mark Return</button></form>
+                    <% } else { %><%= new Date(e.returnDate).toLocaleDateString() %><% } %>
                   </td>
                   <td class="p-3 align-top">
                     <% if (!e.returnDate) { %>
@@ -71,14 +50,11 @@
                         <input type="text" name="damageStatus" placeholder="Damage note" class="border rounded px-2 py-1 text-xs w-24">
                         <button type="submit" class="text-red-600 hover:underline text-xs">Log</button>
                       </form>
-                    <% } else { %>
-                      <%= e.damageStatus || '-' %>
-                      <% if (typeof e.damagePercentage === 'number') { %><div class="text-xs text-gray-500">Model: <%= e.damagePercentage %>%</div><% } %>
-                    <% } %>
+                    <% } else { %><%= e.damageStatus || '-' %><% } %>
                   </td>
                 </tr>
               <% }); %>
-              <% if (equipment.length === 0) { %><tr><td colspan="6" class="p-4 text-gray-500">No equipment records</td></tr><% } %>
+              <% if (equipment.length === 0) { %><tr><td colspan="5" class="p-4 text-gray-500">No equipment records</td></tr><% } %>
             </tbody>
           </table>
         </div>
@@ -86,6 +62,5 @@
     </main>
   </div>
   <%- include('../partials/footer') %>
-  <script src="/js/equipmentDamageModel.js"></script>
 </body>
 </html>
