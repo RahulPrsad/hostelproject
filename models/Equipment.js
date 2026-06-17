@@ -7,10 +7,11 @@ const equipmentSchema = new mongoose.Schema({
   returnDate: { type: Date, default: null },
   issuePhoto: { type: String, default: '' },
   returnPhoto: { type: String, default: '' },
-  damagePercentage: { type: Number, min: 0, max: 100, default: null },
+  photosExpireAt: { type: Date, default: null },
   damageStatus: { type: String, trim: true, default: '' },
 }, { timestamps: true });
 
 equipmentSchema.index({ studentId: 1 });
+equipmentSchema.index({ photosExpireAt: 1 });
 
 module.exports = mongoose.model('Equipment', equipmentSchema);

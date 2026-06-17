@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const { cleanupExpiredEquipmentPhotos } = require('./utils/equipmentPhotoRetention');
 
 connectDB();
 
@@ -25,6 +26,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', authRoutes);
 app.use('/student', studentRoutes);
 app.use('/admin', adminRoutes);
+
+cleanupExpiredEquipmentPhotos().catch(console.error);
+setInterval(() => {
+  cleanupExpiredEquipmentPhotos().catch(console.error);
+}, 60 * 60 * 1000);
 
 app.get('/', (req, res) => {
   res.redirect('/login');

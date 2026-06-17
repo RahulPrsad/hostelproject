@@ -198,22 +198,13 @@
     }
 
     openCaptureCamera('Capture Return Photo', function (returnPhoto) {
-      window.EquipmentDamageModel.predictDamage(item.issuePhoto, returnPhoto)
-        .then(function (damagePercentage) {
-          pendingReturn = {
-            equipmentId: item._id,
-            equipmentName: item.equipmentName,
-            returnPhoto: returnPhoto,
-            damagePercentage: damagePercentage,
-          };
-          returnResultText.textContent = damagePercentage === null
-            ? 'Could not predict damage. You can still agree and mark it returned.'
-            : item.equipmentName + ': ' + damagePercentage + '% predicted damage. Agree to save and close this return.';
-          returnResultPanel.classList.remove('hidden');
-        })
-        .catch(function () {
-          showToast('Could not predict damage', true);
-        });
+      pendingReturn = {
+        equipmentId: item._id,
+        equipmentName: item.equipmentName,
+        returnPhoto: returnPhoto,
+      };
+      returnResultText.textContent = item.equipmentName + ': return photo captured. Agree to save the photo and close this return.';
+      returnResultPanel.classList.remove('hidden');
     });
   }
 
@@ -298,7 +289,6 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         returnPhoto: pendingReturn.returnPhoto,
-        damagePercentage: pendingReturn.damagePercentage,
       })
     }).then(function (r) { return r.json(); })
       .then(function (data) {

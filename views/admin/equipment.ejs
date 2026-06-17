@@ -38,7 +38,7 @@
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Student</th><th class="text-left p-3">Equipment</th><th class="text-left p-3">Photo</th><th class="text-left p-3">Issue Date</th><th class="text-left p-3">Return</th><th class="text-left p-3">Damage</th></tr></thead>
+            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Student</th><th class="text-left p-3">Equipment</th><th class="text-left p-3">Issue Photo</th><th class="text-left p-3">Issue Date</th><th class="text-left p-3">Return</th><th class="text-left p-3">Note</th></tr></thead>
             <tbody>
               <% equipment.forEach(e => { %>
                 <tr class="border-b">
@@ -53,11 +53,9 @@
                   <td class="p-3 align-top">
                     <% if (!e.returnDate) { %>
                       <form action="/admin/equipment/<%= e._id %>/return" method="POST" class="space-y-2">
-                        <input type="hidden" data-existing-issue-photo value="<%= e.issuePhoto || '' %>">
                         <input type="hidden" name="returnPhoto" data-equipment-return-photo>
-                        <input type="hidden" name="damagePercentage" data-equipment-damage-percent>
                         <input type="file" accept="image/*" capture="environment" data-equipment-return-input class="w-40 text-xs">
-                        <p data-equipment-damage-result class="hidden text-xs font-medium text-amber-700"></p>
+                        <p data-equipment-return-result class="hidden text-xs font-medium text-green-700"></p>
                         <button type="submit" class="text-green-600 hover:underline">Mark Return</button>
                       </form>
                     <% } else { %>
@@ -73,7 +71,9 @@
                       </form>
                     <% } else { %>
                       <%= e.damageStatus || '-' %>
-                      <% if (typeof e.damagePercentage === 'number') { %><div class="text-xs text-gray-500">Model: <%= e.damagePercentage %>%</div><% } %>
+                      <% if (e.photosExpireAt && (e.issuePhoto || e.returnPhoto)) { %>
+                        <div class="text-xs text-gray-500">Photos kept until <%= new Date(e.photosExpireAt).toLocaleString() %></div>
+                      <% } %>
                     <% } %>
                   </td>
                 </tr>
@@ -86,6 +86,6 @@
     </main>
   </div>
   <%- include('../partials/footer') %>
-  <script src="/js/equipmentDamageModel.js"></script>
+  <script src="/js/equipmentPhotos.js"></script>
 </body>
 </html>

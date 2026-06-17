@@ -5,8 +5,10 @@ const FruitDistribution = require('../models/FruitDistribution');
 const Complaint = require('../models/Complaint');
 const { validationResult } = require('express-validator');
 const { generateWeeklyPDF } = require('../utils/pdfReport');
+const { cleanupExpiredEquipmentPhotos, getPhotoExpiryDate } = require('../utils/equipmentPhotoRetention');
 
 exports.dashboard = async (req, res) => {
+  await cleanupExpiredEquipmentPhotos();
   const startOfWeek = new Date();
   startOfWeek.setHours(0, 0, 0, 0);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
@@ -87,6 +89,7 @@ exports.studentByQR = async (req, res) => {
 };
 
 exports.activeEquipmentByStudent = async (req, res) => {
+  await cleanupExpiredEquipmentPhotos();
   const studentId = req.query.studentId;
   if (!studentId) return res.status(400).json({ error: 'Student ID required' });
 
@@ -122,6 +125,7 @@ exports.fruitThankYou = (req, res) => {
 };
 
 exports.getEquipment = async (req, res) => {
+  await cleanupExpiredEquipmentPhotos();
   const equipment = await Equipment.find().populate('studentId', 'name email').sort({ issueDate: -1 });
   res.render('admin/equipment', { user: req.user, equipment, success: req.query.success, error: req.query.error, navbar: true, sidebar: true });
 };
@@ -150,13 +154,12 @@ exports.issueEquipmentByQR = async (req, res) => {
 };
 
 exports.returnEquipment = async (req, res) => {
-  const damagePercentage = req.body.damagePercentage === '' || req.body.damagePercentage === undefined ? null : Number(req.body.damagePercentage);
-  const damageStatus = damagePercentage === null ? '' : `${damagePercentage}% predicted damage`;
+  const returnedAt = new Date();
   await Equipment.findByIdAndUpdate(req.params.id, {
-    returnDate: new Date(),
+    returnDate: returnedAt,
     returnPhoto: req.body.returnPhoto || '',
-    damagePercentage,
-    damageStatus,
+    photosExpireAt: getPhotoExpiryDate(returnedAt),
+    damageStatus: 'Returned',
   });
   return res.redirect('/admin/equipment?success=Marked returned');
 };
@@ -165,16 +168,15 @@ exports.returnEquipmentByQR = async (req, res) => {
   const equipment = await Equipment.findOne({ _id: req.params.id, returnDate: null });
   if (!equipment) return res.status(404).json({ error: 'Active equipment record not found' });
 
-  const damagePercentage = req.body.damagePercentage === '' || req.body.damagePercentage === undefined ? null : Number(req.body.damagePercentage);
-  equipment.returnDate = new Date();
+  const returnedAt = new Date();
+  equipment.returnDate = returnedAt;
   equipment.returnPhoto = req.body.returnPhoto || '';
-  equipment.damagePercentage = damagePercentage;
-  equipment.damageStatus = damagePercentage === null ? 'Returned' : `${damagePercentage}% predicted damage`;
+  equipment.photosExpireAt = getPhotoExpiryDate(returnedAt);
+  equipment.damageStatus = 'Returned';
   await equipment.save();
 
   return res.json({
     success: true,
-    damagePercentage,
     equipmentName: equipment.equipmentName,
   });
 };
