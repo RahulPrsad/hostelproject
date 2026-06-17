@@ -36,7 +36,8 @@
                     <% if (l.status === 'pending') { %>
                       <div class="flex flex-wrap gap-2">
                         <% if (l.studentId && l.studentId.parentPhone) { %>
-                          <a href="tel:<%= l.studentId.parentPhone %>" data-call-parent-for="<%= l._id %>" class="text-indigo-600 hover:underline">Call Parent</a>
+                          <% const parentDialNumber = String(l.studentId.parentPhone).replace(/[^\d+]/g, ''); %>
+                          <a href="tel:<%= parentDialNumber %>" data-call-parent-for="<%= l._id %>" class="text-indigo-600 hover:underline">Call Parent</a>
                         <% } else { %>
                           <span class="text-xs text-gray-500">No parent phone</span>
                         <% } %>
