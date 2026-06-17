@@ -13,15 +13,21 @@
   const issueFruitBtn = document.getElementById('issueFruitBtn');
   const issueEquipBtn = document.getElementById('issueEquipBtn');
   const toast = document.getElementById('toast');
-  const equipmentPhotoInput = document.getElementById('equipmentPhotoInput');
-  const returnEquipmentPhotoInput = document.getElementById('returnEquipmentPhotoInput');
   const refreshEquipmentBtn = document.getElementById('refreshEquipmentBtn');
   const activeEquipmentList = document.getElementById('activeEquipmentList');
   const returnResultPanel = document.getElementById('returnResultPanel');
   const returnResultText = document.getElementById('returnResultText');
   const agreeReturnBtn = document.getElementById('agreeReturnBtn');
   const cancelReturnBtn = document.getElementById('cancelReturnBtn');
+  const capturePanel = document.getElementById('capturePanel');
+  const captureTitle = document.getElementById('captureTitle');
+  const captureVideo = document.getElementById('captureVideo');
+  const captureCanvas = document.getElementById('captureCanvas');
+  const captureImageBtn = document.getElementById('captureImageBtn');
+  const cancelCaptureBtn = document.getElementById('cancelCaptureBtn');
   let pendingReturn = null;
+  let captureStream = null;
+  let captureCallback = null;
 
   function showToast(msg, isError) {
     toast.textContent = msg;
@@ -53,6 +59,62 @@
         showStudent(data);
       })
       .catch(function () { showToast('Failed to fetch student', true); });
+  }
+
+  function stopQrScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+      return html5QrCode.stop().then(function () {
+        stopBtn.style.display = 'none';
+        startBtn.style.display = 'inline-block';
+      }).catch(function () {});
+    }
+    return Promise.resolve();
+  }
+
+  function stopCaptureCamera() {
+    if (captureStream) {
+      captureStream.getTracks().forEach(function (track) { track.stop(); });
+      captureStream = null;
+    }
+    captureVideo.srcObject = null;
+    captureCallback = null;
+    capturePanel.classList.add('hidden');
+  }
+
+  function frameToDataUrl() {
+    var width = captureVideo.videoWidth || 640;
+    var height = captureVideo.videoHeight || 480;
+    var maxSize = 512;
+    var scale = Math.min(1, maxSize / Math.max(width, height));
+    captureCanvas.width = Math.max(1, Math.round(width * scale));
+    captureCanvas.height = Math.max(1, Math.round(height * scale));
+    var ctx = captureCanvas.getContext('2d');
+    ctx.drawImage(captureVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+    return captureCanvas.toDataURL('image/jpeg', 0.76);
+  }
+
+  function openCaptureCamera(title, onCapture) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('Camera capture is not supported in this browser', true);
+      return;
+    }
+
+    stopQrScanner().then(function () {
+      captureTitle.textContent = title;
+      captureCallback = onCapture;
+      capturePanel.classList.remove('hidden');
+      return navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false
+      });
+    }).then(function (stream) {
+      captureStream = stream;
+      captureVideo.srcObject = stream;
+      return captureVideo.play();
+    }).catch(function (err) {
+      stopCaptureCamera();
+      showToast('Camera error: ' + (err.message || 'Permission denied'), true);
+    });
   }
 
   function resetReturnResult() {
@@ -135,32 +197,24 @@
       return;
     }
 
-    returnEquipmentPhotoInput.value = '';
-    returnEquipmentPhotoInput.onchange = function () {
-      var file = returnEquipmentPhotoInput.files && returnEquipmentPhotoInput.files[0];
-      if (!file) return;
-
-      window.EquipmentDamageModel.compressImage(file)
-        .then(function (returnPhoto) {
-          return window.EquipmentDamageModel.predictDamage(item.issuePhoto, returnPhoto)
-            .then(function (damagePercentage) {
-              pendingReturn = {
-                equipmentId: item._id,
-                equipmentName: item.equipmentName,
-                returnPhoto: returnPhoto,
-                damagePercentage: damagePercentage,
-              };
-              returnResultText.textContent = damagePercentage === null
-                ? 'Could not predict damage. You can still agree and mark it returned.'
-                : item.equipmentName + ': ' + damagePercentage + '% predicted damage. Agree to save and close this return.';
-              returnResultPanel.classList.remove('hidden');
-            });
+    openCaptureCamera('Capture Return Photo', function (returnPhoto) {
+      window.EquipmentDamageModel.predictDamage(item.issuePhoto, returnPhoto)
+        .then(function (damagePercentage) {
+          pendingReturn = {
+            equipmentId: item._id,
+            equipmentName: item.equipmentName,
+            returnPhoto: returnPhoto,
+            damagePercentage: damagePercentage,
+          };
+          returnResultText.textContent = damagePercentage === null
+            ? 'Could not predict damage. You can still agree and mark it returned.'
+            : item.equipmentName + ': ' + damagePercentage + '% predicted damage. Agree to save and close this return.';
+          returnResultPanel.classList.remove('hidden');
         })
         .catch(function () {
-          showToast('Could not read return image', true);
+          showToast('Could not predict damage', true);
         });
-    };
-    returnEquipmentPhotoInput.click();
+    });
   }
 
   startBtn.addEventListener('click', function () {
@@ -215,29 +269,21 @@
     if (!id) { showToast('No student selected', true); return; }
     var name = window.prompt('Equipment name:');
     if (!name) return;
-    equipmentPhotoInput.value = '';
-    equipmentPhotoInput.onchange = function () {
-      var file = equipmentPhotoInput.files && equipmentPhotoInput.files[0];
-      var photoPromise = file && window.EquipmentDamageModel ? window.EquipmentDamageModel.compressImage(file) : Promise.resolve('');
-      photoPromise.then(function (issuePhoto) {
-        fetch('/admin/equipment/qr', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId: id, equipmentName: name, issuePhoto: issuePhoto })
-        }).then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (data && data.success) {
-              showToast('Equipment issued');
-              loadActiveEquipment(id);
-            }
-            else showToast((data && data.error) || 'Failed', true);
-          })
-          .catch(function () { showToast('Request failed', true); });
-      }).catch(function () {
-        showToast('Could not read equipment image', true);
-      });
-    };
-    equipmentPhotoInput.click();
+    openCaptureCamera('Capture Issue Photo', function (issuePhoto) {
+      fetch('/admin/equipment/qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: id, equipmentName: name, issuePhoto: issuePhoto })
+      }).then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data && data.success) {
+            showToast('Equipment issued');
+            loadActiveEquipment(id);
+          }
+          else showToast((data && data.error) || 'Failed', true);
+        })
+        .catch(function () { showToast('Request failed', true); });
+    });
   });
 
   refreshEquipmentBtn.addEventListener('click', function () {
@@ -271,5 +317,16 @@
 
   cancelReturnBtn.addEventListener('click', function () {
     resetReturnResult();
+  });
+
+  captureImageBtn.addEventListener('click', function () {
+    var callback = captureCallback;
+    var dataUrl = frameToDataUrl();
+    stopCaptureCamera();
+    if (callback) callback(dataUrl);
+  });
+
+  cancelCaptureBtn.addEventListener('click', function () {
+    stopCaptureCamera();
   });
 })();
