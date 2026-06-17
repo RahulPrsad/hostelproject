@@ -86,6 +86,17 @@ exports.studentByQR = async (req, res) => {
   return res.json(student);
 };
 
+exports.activeEquipmentByStudent = async (req, res) => {
+  const studentId = req.query.studentId;
+  if (!studentId) return res.status(400).json({ error: 'Student ID required' });
+
+  const equipment = await Equipment.find({ studentId, returnDate: null })
+    .select('equipmentName issueDate issuePhoto')
+    .sort({ issueDate: -1 });
+
+  return res.json({ equipment });
+};
+
 exports.getFruit = (req, res) => {
   res.render('admin/fruit', { user: req.user, success: req.query.success, error: req.query.error, navbar: true, sidebar: true });
 };
@@ -122,6 +133,10 @@ exports.issueEquipment = async (req, res) => {
     return res.render('admin/equipment', { user: req.user, equipment, error: errors.array()[0].msg, navbar: true, sidebar: true });
   }
   const { studentId, equipmentName, issuePhoto } = req.body;
+  if (!issuePhoto) {
+    const equipment = await Equipment.find().populate('studentId', 'name email').sort({ issueDate: -1 });
+    return res.render('admin/equipment', { user: req.user, equipment, error: 'Issue photo required', navbar: true, sidebar: true });
+  }
   await Equipment.create({ studentId, equipmentName, issuePhoto, issueDate: new Date() });
   return res.redirect('/admin/equipment?success=Equipment issued');
 };
@@ -129,6 +144,7 @@ exports.issueEquipment = async (req, res) => {
 exports.issueEquipmentByQR = async (req, res) => {
   const { studentId, equipmentName, issuePhoto } = req.body;
   if (!studentId || !equipmentName) return res.status(400).json({ error: 'Student ID and equipment name required' });
+  if (!issuePhoto) return res.status(400).json({ error: 'Issue photo required' });
   await Equipment.create({ studentId, equipmentName, issuePhoto, issueDate: new Date() });
   return res.json({ success: true });
 };
@@ -143,6 +159,24 @@ exports.returnEquipment = async (req, res) => {
     damageStatus,
   });
   return res.redirect('/admin/equipment?success=Marked returned');
+};
+
+exports.returnEquipmentByQR = async (req, res) => {
+  const equipment = await Equipment.findOne({ _id: req.params.id, returnDate: null });
+  if (!equipment) return res.status(404).json({ error: 'Active equipment record not found' });
+
+  const damagePercentage = req.body.damagePercentage === '' || req.body.damagePercentage === undefined ? null : Number(req.body.damagePercentage);
+  equipment.returnDate = new Date();
+  equipment.returnPhoto = req.body.returnPhoto || '';
+  equipment.damagePercentage = damagePercentage;
+  equipment.damageStatus = damagePercentage === null ? 'Returned' : `${damagePercentage}% predicted damage`;
+  await equipment.save();
+
+  return res.json({
+    success: true,
+    damagePercentage,
+    equipmentName: equipment.equipmentName,
+  });
 };
 
 exports.logDamage = async (req, res) => {
