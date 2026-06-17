@@ -22,6 +22,7 @@ router.post('/complaint', [
 ], studentController.postComplaint);
 router.get('/fruit-history', studentController.fruitHistory);
 router.get('/equipment', studentController.equipment);
+router.post('/equipment/:id/return', studentController.returnEquipment);
 router.get('/my-qr', studentController.myQR);
 
 module.exports = router;

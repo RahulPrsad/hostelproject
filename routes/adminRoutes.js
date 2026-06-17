@@ -21,6 +21,7 @@ router.get('/api/student-by-qr', adminController.studentByQR);
 router.get('/fruit', adminController.getFruit);
 router.post('/fruit', adminController.issueFruit);
 router.post('/fruit/qr', adminController.issueFruitByQR);
+router.get('/fruit/thank-you', adminController.fruitThankYou);
 router.get('/equipment', adminController.getEquipment);
 router.post('/equipment', [
   body('studentId').notEmpty().withMessage('Student required'),

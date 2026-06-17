@@ -60,7 +60,7 @@ exports.rejectStudent = async (req, res) => {
 };
 
 exports.leaves = async (req, res) => {
-  const leaves = await Leave.find().populate('studentId', 'name email branch year').sort({ createdAt: -1 });
+  const leaves = await Leave.find().populate('studentId', 'name email branch year parentName parentPhone').sort({ createdAt: -1 });
   res.render('admin/leaves', { user: req.user, leaves, success: req.query.success, navbar: true, sidebar: true });
 };
 
@@ -95,7 +95,7 @@ exports.issueFruit = async (req, res) => {
   if (!studentId) return res.redirect('/admin/fruit?error=Student required');
   const quantity = Number(req.body.quantity) || 1;
   await FruitDistribution.create({ studentId, date: new Date(), quantity });
-  return res.redirect('/admin/fruit?success=Fruit issued');
+  return res.redirect('/admin/fruit/thank-you');
 };
 
 exports.issueFruitByQR = async (req, res) => {
@@ -103,7 +103,11 @@ exports.issueFruitByQR = async (req, res) => {
   const quantity = Number(req.body.quantity) || 1;
   if (!studentId) return res.status(400).json({ error: 'Student ID required' });
   await FruitDistribution.create({ studentId, date: new Date(), quantity });
-  return res.json({ success: true });
+  return res.json({ success: true, redirectUrl: '/admin/fruit/thank-you' });
+};
+
+exports.fruitThankYou = (req, res) => {
+  res.render('admin/fruitThankYou', { user: req.user, navbar: true, sidebar: true });
 };
 
 exports.getEquipment = async (req, res) => {
@@ -117,20 +121,27 @@ exports.issueEquipment = async (req, res) => {
     const equipment = await Equipment.find().populate('studentId', 'name email').sort({ issueDate: -1 });
     return res.render('admin/equipment', { user: req.user, equipment, error: errors.array()[0].msg, navbar: true, sidebar: true });
   }
-  const { studentId, equipmentName } = req.body;
-  await Equipment.create({ studentId, equipmentName, issueDate: new Date() });
+  const { studentId, equipmentName, issuePhoto } = req.body;
+  await Equipment.create({ studentId, equipmentName, issuePhoto, issueDate: new Date() });
   return res.redirect('/admin/equipment?success=Equipment issued');
 };
 
 exports.issueEquipmentByQR = async (req, res) => {
-  const { studentId, equipmentName } = req.body;
+  const { studentId, equipmentName, issuePhoto } = req.body;
   if (!studentId || !equipmentName) return res.status(400).json({ error: 'Student ID and equipment name required' });
-  await Equipment.create({ studentId, equipmentName, issueDate: new Date() });
+  await Equipment.create({ studentId, equipmentName, issuePhoto, issueDate: new Date() });
   return res.json({ success: true });
 };
 
 exports.returnEquipment = async (req, res) => {
-  await Equipment.findByIdAndUpdate(req.params.id, { returnDate: new Date() });
+  const damagePercentage = req.body.damagePercentage === '' || req.body.damagePercentage === undefined ? null : Number(req.body.damagePercentage);
+  const damageStatus = damagePercentage === null ? '' : `${damagePercentage}% predicted damage`;
+  await Equipment.findByIdAndUpdate(req.params.id, {
+    returnDate: new Date(),
+    returnPhoto: req.body.returnPhoto || '',
+    damagePercentage,
+    damageStatus,
+  });
   return res.redirect('/admin/equipment?success=Marked returned');
 };
 

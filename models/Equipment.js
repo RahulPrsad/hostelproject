@@ -5,6 +5,9 @@ const equipmentSchema = new mongoose.Schema({
   equipmentName: { type: String, required: true, trim: true },
   issueDate: { type: Date, required: true, default: Date.now },
   returnDate: { type: Date, default: null },
+  issuePhoto: { type: String, default: '' },
+  returnPhoto: { type: String, default: '' },
+  damagePercentage: { type: Number, min: 0, max: 100, default: null },
   damageStatus: { type: String, trim: true, default: '' },
 }, { timestamps: true });
 
