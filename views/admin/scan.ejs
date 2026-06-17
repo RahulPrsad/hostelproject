@@ -27,8 +27,6 @@
           <p id="sYear" class="text-gray-600 text-sm"></p>
           <p class="mt-2">Parent: <a id="sParentLink" href="#" class="text-indigo-600 hover:underline">Call Parent</a></p>
           <input type="hidden" id="studentId" value="">
-          <input type="file" id="equipmentPhotoInput" accept="image/*" capture="environment" class="hidden">
-          <input type="file" id="returnEquipmentPhotoInput" accept="image/*" capture="environment" class="hidden">
           <div class="mt-4 space-y-2">
             <button type="button" id="issueFruitBtn" class="block w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Issue Fruit</button>
             <button type="button" id="issueEquipBtn" class="block w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Issue Equipment</button>
@@ -46,6 +44,19 @@
               <button type="button" id="agreeReturnBtn" class="rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700">Agree</button>
               <button type="button" id="cancelReturnBtn" class="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-white">Close</button>
             </div>
+          </div>
+        </div>
+      </div>
+      <div id="capturePanel" class="fixed inset-0 z-40 hidden bg-black/70 p-4">
+        <div class="mx-auto flex h-full max-w-lg flex-col justify-center">
+          <div class="rounded-lg bg-white p-4 shadow-xl">
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <h2 id="captureTitle" class="font-semibold text-gray-900">Capture Equipment Photo</h2>
+              <button type="button" id="cancelCaptureBtn" class="rounded border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50">Close</button>
+            </div>
+            <video id="captureVideo" autoplay playsinline muted class="aspect-video w-full rounded bg-black object-cover"></video>
+            <canvas id="captureCanvas" class="hidden"></canvas>
+            <button type="button" id="captureImageBtn" class="mt-3 w-full rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Capture Photo</button>
           </div>
         </div>
       </div>
