@@ -52,6 +52,11 @@
     var hasPendingLeave = Boolean(data.pendingLeave);
     issueFruitBtn.classList.toggle('hidden', onLeave);
     issueEquipBtn.classList.toggle('hidden', onLeave);
+    issueFruitBtn.disabled = Boolean(data.fruitIssuedToday);
+    issueFruitBtn.textContent = data.fruitIssuedToday ? 'Done for today' : 'Issue Fruit';
+    issueFruitBtn.className = data.fruitIssuedToday
+      ? 'block w-full rounded bg-slate-300 py-2 text-slate-700'
+      : 'block w-full bg-green-600 text-white py-2 rounded hover:bg-green-700';
     leaveRequestBtn.classList.toggle('hidden', !hasPendingLeave);
     leaveRequestBtn.href = '/admin/leaves?studentId=' + encodeURIComponent(data._id);
 
@@ -307,14 +312,23 @@
     var id = studentIdInput.value;
     if (!id) { showToast('No student selected', true); return; }
     if (currentStudent && currentStudent.activeLeave) { showToast('Student is on leave', true); return; }
+    if (currentStudent && currentStudent.fruitIssuedToday) { showToast('Done for today', true); return; }
     fetch('/admin/fruit/qr', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
       body: JSON.stringify({ studentId: id, quantity: 1 })
     }).then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data.success && data.redirectUrl) window.location.href = data.redirectUrl;
-        else if (data.success) showToast('Fruit issued');
+        if (data.success && data.redirectUrl) {
+          if (currentStudent) currentStudent.fruitIssuedToday = true;
+          showActionsForStudent(currentStudent || {});
+          window.location.href = data.redirectUrl;
+        }
+        else if (data.success) {
+          if (currentStudent) currentStudent.fruitIssuedToday = true;
+          showActionsForStudent(currentStudent || {});
+          showToast('Fruit issued');
+        }
         else showToast(data.error || 'Failed', true);
       })
       .catch(function () { showToast('Request failed', true); });

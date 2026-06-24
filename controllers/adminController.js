@@ -40,6 +40,22 @@ async function ensureStudentPresent(studentId) {
   }
 }
 
+async function hasFruitToday(studentId) {
+  const { start, end } = getTodayRange();
+  return Boolean(await FruitDistribution.exists({
+    studentId,
+    date: { $gte: start, $lte: end },
+  }));
+}
+
+async function ensureFruitNotIssuedToday(studentId) {
+  if (await hasFruitToday(studentId)) {
+    const error = new Error('Done for today');
+    error.statusCode = 409;
+    throw error;
+  }
+}
+
 exports.dashboard = async (req, res) => {
   await cleanupExpiredEquipmentPhotos();
   const startOfWeek = new Date();
@@ -123,9 +139,10 @@ exports.studentByQR = async (req, res) => {
   if (!id) return res.status(400).json({ error: 'Missing student id' });
   const student = await Student.findById(id).select('name email branch year parentName parentPhone');
   if (!student) return res.status(404).json({ error: 'Student not found' });
-  const [activeLeave, pendingLeave] = await Promise.all([
+  const [activeLeave, pendingLeave, fruitIssuedToday] = await Promise.all([
     getActiveLeave(student._id),
     Leave.findOne({ studentId: student._id, status: 'pending' }).sort({ createdAt: -1 }),
+    hasFruitToday(student._id),
   ]);
   return res.json({
     ...student.toObject(),
@@ -141,6 +158,7 @@ exports.studentByQR = async (req, res) => {
       toDate: pendingLeave.toDate,
       reason: pendingLeave.reason,
     } : null,
+    fruitIssuedToday,
   });
 };
 
@@ -173,8 +191,9 @@ exports.issueFruit = async (req, res) => {
   if (!studentId) return res.redirect('/admin/fruit?error=Student required');
   try {
     await ensureStudentPresent(studentId);
+    await ensureFruitNotIssuedToday(studentId);
   } catch (error) {
-    return res.redirect('/admin/fruit?error=Student is currently on leave');
+    return res.redirect(`/admin/fruit?error=${encodeURIComponent(error.message)}`);
   }
   const quantity = Number(req.body.quantity) || 1;
   await FruitDistribution.create({ studentId, date: new Date(), quantity });
@@ -187,6 +206,7 @@ exports.issueFruitByQR = async (req, res) => {
   if (!studentId) return res.status(400).json({ error: 'Student ID required' });
   try {
     await ensureStudentPresent(studentId);
+    await ensureFruitNotIssuedToday(studentId);
   } catch (error) {
     return res.status(error.statusCode || 400).json({ error: error.message });
   }
