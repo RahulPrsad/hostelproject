@@ -11,19 +11,19 @@ const getWeekRange = () => {
   return { start, end };
 };
 
-const generateWeeklyPDF = async () => {
+const generateReportPDF = async ({ start, end } = {}) => {
   const doc = new PDFDocument({ margin: 50 });
-  const { start, end } = getWeekRange();
+  const range = start && end ? { start, end } : getWeekRange();
 
-  doc.fontSize(20).text('Weekly Hostel Report', { align: 'center' });
+  doc.fontSize(20).text('Hostel Report', { align: 'center' });
   doc.moveDown();
-  doc.fontSize(10).text(`Period: ${start.toLocaleDateString()} to ${end.toLocaleDateString()}`, { align: 'center' });
+  doc.fontSize(10).text(`Period: ${range.start.toLocaleDateString()} to ${range.end.toLocaleDateString()}`, { align: 'center' });
   doc.moveDown(2);
 
-  const fruitRecords = await FruitDistribution.find({ date: { $gte: start, $lte: end } }).populate('studentId', 'name');
+  const fruitRecords = await FruitDistribution.find({ date: { $gte: range.start, $lte: range.end } }).populate('studentId', 'name');
   doc.fontSize(14).text('Fruit Distribution Summary', { underline: true });
   doc.moveDown(0.5);
-  doc.fontSize(10).text(`Total distributions this week: ${fruitRecords.length}`);
+  doc.fontSize(10).text(`Total distributions: ${fruitRecords.length}`);
   if (fruitRecords.length > 0) {
     fruitRecords.forEach((r, i) => {
       doc.text(`${i + 1}. ${r.studentId?.name || 'N/A'} - ${r.date.toLocaleDateString()} - Qty: ${r.quantity}`);
@@ -33,8 +33,8 @@ const generateWeeklyPDF = async () => {
 
   const equipmentRecords = await Equipment.find({
     $or: [
-      { issueDate: { $gte: start, $lte: end } },
-      { returnDate: { $gte: start, $lte: end } },
+      { issueDate: { $gte: range.start, $lte: range.end } },
+      { returnDate: { $gte: range.start, $lte: range.end } },
     ],
   }).populate('studentId', 'name');
   doc.fontSize(14).text('Equipment Usage', { underline: true });
@@ -46,7 +46,7 @@ const generateWeeklyPDF = async () => {
   doc.moveDown(2);
 
   const leaves = await Leave.find({
-    createdAt: { $gte: start, $lte: end },
+    createdAt: { $gte: range.start, $lte: range.end },
     status: { $in: ['approved', 'rejected'] },
   }).populate('studentId', 'name');
   doc.fontSize(14).text('Leave Approvals / Rejections', { underline: true });
@@ -59,4 +59,6 @@ const generateWeeklyPDF = async () => {
   return doc;
 };
 
-module.exports = { generateWeeklyPDF };
+const generateWeeklyPDF = () => generateReportPDF();
+
+module.exports = { generateReportPDF, generateWeeklyPDF };
