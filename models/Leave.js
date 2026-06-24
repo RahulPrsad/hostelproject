@@ -6,6 +6,7 @@ const leaveSchema = new mongoose.Schema({
   toDate: { type: Date, required: true },
   reason: { type: String, required: true, trim: true },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+  earlyReturnAt: { type: Date, default: null },
 }, { timestamps: true });
 
 leaveSchema.index({ studentId: 1, createdAt: -1 });

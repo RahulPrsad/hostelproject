@@ -16,7 +16,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="rounded-lg bg-white p-4 shadow">
           <div id="reader" class="w-full"></div>
-          <button type="button" id="startBtn" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Start Camera</button>
+          <button type="button" id="startBtn" class="mt-2 hidden bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Retry Camera</button>
           <button type="button" id="stopBtn" class="mt-2 ml-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" style="display:none">Stop</button>
         </div>
         <div id="studentCard" class="rounded-lg bg-white p-6 shadow hidden">
@@ -26,10 +26,12 @@
           <p id="sBranch" class="text-gray-600 text-sm"></p>
           <p id="sYear" class="text-gray-600 text-sm"></p>
           <p class="mt-2">Parent: <a id="sParentLink" href="#" class="text-indigo-600 hover:underline">Call Parent</a></p>
+          <div id="leaveStatusPanel" class="mt-4 hidden rounded border p-4 text-sm"></div>
           <input type="hidden" id="studentId" value="">
           <div class="mt-4 space-y-2">
             <button type="button" id="issueFruitBtn" class="block w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Issue Fruit</button>
             <button type="button" id="issueEquipBtn" class="block w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Issue Equipment</button>
+            <a id="leaveRequestBtn" href="/admin/leaves" class="hidden block w-full rounded bg-amber-600 py-2 text-center text-white hover:bg-amber-700">Leave Request</a>
           </div>
           <div class="mt-6 border-t pt-4">
             <div class="mb-3 flex items-center justify-between gap-3">
