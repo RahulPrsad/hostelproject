@@ -7,11 +7,45 @@ const { validationResult } = require('express-validator');
 const { generateReportPDF, generateWeeklyPDF } = require('../utils/pdfReport');
 const { cleanupExpiredEquipmentPhotos, getPhotoExpiryDate } = require('../utils/equipmentPhotoRetention');
 
+function getTodayRange() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+function getActiveLeaveQuery(studentId) {
+  const { start, end } = getTodayRange();
+  const query = {
+    status: 'approved',
+    earlyReturnAt: null,
+    fromDate: { $lte: end },
+    toDate: { $gte: start },
+  };
+  if (studentId) query.studentId = studentId;
+  return query;
+}
+
+async function getActiveLeave(studentId) {
+  return Leave.findOne(getActiveLeaveQuery(studentId)).sort({ fromDate: -1 });
+}
+
+async function ensureStudentPresent(studentId) {
+  const activeLeave = await getActiveLeave(studentId);
+  if (activeLeave) {
+    const error = new Error('Student is currently on leave');
+    error.statusCode = 409;
+    throw error;
+  }
+}
+
 exports.dashboard = async (req, res) => {
   await cleanupExpiredEquipmentPhotos();
   const startOfWeek = new Date();
   startOfWeek.setHours(0, 0, 0, 0);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  const activeLeaveStudentIds = await Leave.distinct('studentId', getActiveLeaveQuery());
   const [totalStudents, pendingStudents, pendingLeaves, equipmentIssued, fruitThisWeek, complaintCount] = await Promise.all([
     Student.countDocuments({ role: 'student', approvalStatus: { $ne: 'rejected' } }),
     Student.countDocuments({ role: 'student', isVerified: true, approvalStatus: 'pending' }),
@@ -20,9 +54,13 @@ exports.dashboard = async (req, res) => {
     FruitDistribution.countDocuments({ date: { $gte: startOfWeek } }),
     Complaint.countDocuments({ status: 'open' }),
   ]);
+  const onLeaveStudents = activeLeaveStudentIds.length;
+  const presentStudents = Math.max(totalStudents - onLeaveStudents, 0);
   res.render('admin/dashboard', {
     user: req.user,
     totalStudents,
+    presentStudents,
+    onLeaveStudents,
     pendingStudents,
     pendingLeaves,
     equipmentIssued,
@@ -63,7 +101,7 @@ exports.rejectStudent = async (req, res) => {
 
 exports.leaves = async (req, res) => {
   const leaves = await Leave.find().populate('studentId', 'name email branch year parentName parentPhone').sort({ createdAt: -1 });
-  res.render('admin/leaves', { user: req.user, leaves, success: req.query.success, navbar: true, sidebar: true });
+  res.render('admin/leaves', { user: req.user, leaves, success: req.query.success, focusStudentId: req.query.studentId || '', navbar: true, sidebar: true });
 };
 
 exports.approveLeave = async (req, res) => {
@@ -85,7 +123,33 @@ exports.studentByQR = async (req, res) => {
   if (!id) return res.status(400).json({ error: 'Missing student id' });
   const student = await Student.findById(id).select('name email branch year parentName parentPhone');
   if (!student) return res.status(404).json({ error: 'Student not found' });
-  return res.json(student);
+  const [activeLeave, pendingLeave] = await Promise.all([
+    getActiveLeave(student._id),
+    Leave.findOne({ studentId: student._id, status: 'pending' }).sort({ createdAt: -1 }),
+  ]);
+  return res.json({
+    ...student.toObject(),
+    activeLeave: activeLeave ? {
+      _id: activeLeave._id,
+      fromDate: activeLeave.fromDate,
+      toDate: activeLeave.toDate,
+      reason: activeLeave.reason,
+    } : null,
+    pendingLeave: pendingLeave ? {
+      _id: pendingLeave._id,
+      fromDate: pendingLeave.fromDate,
+      toDate: pendingLeave.toDate,
+      reason: pendingLeave.reason,
+    } : null,
+  });
+};
+
+exports.markStudentPresent = async (req, res) => {
+  const activeLeave = await getActiveLeave(req.params.id);
+  if (!activeLeave) return res.status(404).json({ error: 'No active leave found for this student' });
+  activeLeave.earlyReturnAt = new Date();
+  await activeLeave.save();
+  return res.json({ success: true });
 };
 
 exports.activeEquipmentByStudent = async (req, res) => {
@@ -107,6 +171,11 @@ exports.getFruit = (req, res) => {
 exports.issueFruit = async (req, res) => {
   const studentId = req.body.studentId || req.query.studentId;
   if (!studentId) return res.redirect('/admin/fruit?error=Student required');
+  try {
+    await ensureStudentPresent(studentId);
+  } catch (error) {
+    return res.redirect('/admin/fruit?error=Student is currently on leave');
+  }
   const quantity = Number(req.body.quantity) || 1;
   await FruitDistribution.create({ studentId, date: new Date(), quantity });
   return res.redirect('/admin/fruit/thank-you');
@@ -116,6 +185,11 @@ exports.issueFruitByQR = async (req, res) => {
   const { studentId } = req.body;
   const quantity = Number(req.body.quantity) || 1;
   if (!studentId) return res.status(400).json({ error: 'Student ID required' });
+  try {
+    await ensureStudentPresent(studentId);
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ error: error.message });
+  }
   await FruitDistribution.create({ studentId, date: new Date(), quantity });
   return res.json({ success: true, redirectUrl: '/admin/fruit/thank-you' });
 };
@@ -137,6 +211,12 @@ exports.issueEquipment = async (req, res) => {
     return res.render('admin/equipment', { user: req.user, equipment, error: errors.array()[0].msg, navbar: true, sidebar: true });
   }
   const { studentId, equipmentName, issuePhoto } = req.body;
+  try {
+    await ensureStudentPresent(studentId);
+  } catch (error) {
+    const equipment = await Equipment.find().populate('studentId', 'name email').sort({ issueDate: -1 });
+    return res.render('admin/equipment', { user: req.user, equipment, error: 'Student is currently on leave', navbar: true, sidebar: true });
+  }
   if (!issuePhoto) {
     const equipment = await Equipment.find().populate('studentId', 'name email').sort({ issueDate: -1 });
     return res.render('admin/equipment', { user: req.user, equipment, error: 'Issue photo required', navbar: true, sidebar: true });
@@ -148,6 +228,11 @@ exports.issueEquipment = async (req, res) => {
 exports.issueEquipmentByQR = async (req, res) => {
   const { studentId, equipmentName, issuePhoto } = req.body;
   if (!studentId || !equipmentName) return res.status(400).json({ error: 'Student ID and equipment name required' });
+  try {
+    await ensureStudentPresent(studentId);
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ error: error.message });
+  }
   if (!issuePhoto) return res.status(400).json({ error: 'Issue photo required' });
   await Equipment.create({ studentId, equipmentName, issuePhoto, issueDate: new Date() });
   return res.json({ success: true });

@@ -9,9 +9,11 @@
   const sBranch = document.getElementById('sBranch');
   const sYear = document.getElementById('sYear');
   const sParentLink = document.getElementById('sParentLink');
+  const leaveStatusPanel = document.getElementById('leaveStatusPanel');
   const studentIdInput = document.getElementById('studentId');
   const issueFruitBtn = document.getElementById('issueFruitBtn');
   const issueEquipBtn = document.getElementById('issueEquipBtn');
+  const leaveRequestBtn = document.getElementById('leaveRequestBtn');
   const toast = document.getElementById('toast');
   const refreshEquipmentBtn = document.getElementById('refreshEquipmentBtn');
   const activeEquipmentList = document.getElementById('activeEquipmentList');
@@ -28,6 +30,7 @@
   let pendingReturn = null;
   let captureStream = null;
   let captureCallback = null;
+  let currentStudent = null;
 
   function showToast(msg, isError) {
     toast.textContent = msg;
@@ -40,6 +43,39 @@
     return String(phone || '').replace(/[^\d+]/g, '');
   }
 
+  function formatDate(value) {
+    return value ? new Date(value).toLocaleDateString() : '-';
+  }
+
+  function showActionsForStudent(data) {
+    var onLeave = Boolean(data.activeLeave);
+    var hasPendingLeave = Boolean(data.pendingLeave);
+    issueFruitBtn.classList.toggle('hidden', onLeave);
+    issueEquipBtn.classList.toggle('hidden', onLeave);
+    leaveRequestBtn.classList.toggle('hidden', !hasPendingLeave);
+    leaveRequestBtn.href = '/admin/leaves?studentId=' + encodeURIComponent(data._id);
+
+    leaveStatusPanel.classList.remove('hidden', 'border-amber-200', 'bg-amber-50', 'text-amber-900', 'border-indigo-200', 'bg-indigo-50', 'text-indigo-900');
+    if (onLeave) {
+      leaveStatusPanel.classList.add('border-amber-200', 'bg-amber-50', 'text-amber-900');
+      leaveStatusPanel.innerHTML =
+        '<p class="font-semibold">Student is currently on leave.</p>' +
+        '<p class="mt-1">Leave: ' + formatDate(data.activeLeave.fromDate) + ' to ' + formatDate(data.activeLeave.toDate) + '</p>' +
+        '<p class="mt-1">' + (data.activeLeave.reason || '') + '</p>' +
+        '<button type="button" id="markPresentBtn" class="mt-3 rounded bg-green-600 px-3 py-2 text-white hover:bg-green-700">Mark Student Present</button>';
+      document.getElementById('markPresentBtn').addEventListener('click', markStudentPresent);
+    } else if (hasPendingLeave) {
+      leaveStatusPanel.classList.add('border-indigo-200', 'bg-indigo-50', 'text-indigo-900');
+      leaveStatusPanel.innerHTML =
+        '<p class="font-semibold">Pending leave request found.</p>' +
+        '<p class="mt-1">Leave: ' + formatDate(data.pendingLeave.fromDate) + ' to ' + formatDate(data.pendingLeave.toDate) + '</p>' +
+        '<p class="mt-1">' + (data.pendingLeave.reason || '') + '</p>';
+    } else {
+      leaveStatusPanel.classList.add('hidden');
+      leaveStatusPanel.innerHTML = '';
+    }
+  }
+
   function showStudent(data) {
     sName.textContent = data.name;
     sEmail.textContent = data.email;
@@ -49,7 +85,9 @@
     sParentLink.href = dialNumber ? 'tel:' + dialNumber : '#';
     sParentLink.textContent = data.parentPhone ? data.parentPhone : 'N/A';
     studentIdInput.value = data._id;
+    currentStudent = data;
     studentCard.classList.remove('hidden');
+    showActionsForStudent(data);
     loadActiveEquipment(data._id);
   }
 
@@ -64,6 +102,23 @@
         showStudent(data);
       })
       .catch(function () { showToast('Failed to fetch student', true); });
+  }
+
+  function markStudentPresent() {
+    if (!currentStudent) return;
+    fetch('/admin/students/' + encodeURIComponent(currentStudent._id) + '/present', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }).then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.success) {
+          showToast('Student marked present');
+          fetchStudent(currentStudent._id);
+        } else {
+          showToast((data && data.error) || 'Failed to mark present', true);
+        }
+      })
+      .catch(function () { showToast('Request failed', true); });
   }
 
   function stopQrScanner() {
@@ -213,7 +268,7 @@
     });
   }
 
-  startBtn.addEventListener('click', function () {
+  function startScanner() {
     if (html5QrCode && html5QrCode.isScanning) return;
     html5QrCode = new Html5Qrcode('reader');
     html5QrCode.start(
@@ -232,8 +287,12 @@
       stopBtn.style.display = 'inline-block';
     }).catch(function (err) {
       showToast('Camera error: ' + (err.message || 'Permission denied'), true);
+      startBtn.textContent = 'Retry Camera';
+      startBtn.style.display = 'inline-block';
     });
-  });
+  }
+
+  startBtn.addEventListener('click', startScanner);
 
   stopBtn.addEventListener('click', function () {
     if (html5QrCode) {
@@ -247,6 +306,7 @@
   issueFruitBtn.addEventListener('click', function () {
     var id = studentIdInput.value;
     if (!id) { showToast('No student selected', true); return; }
+    if (currentStudent && currentStudent.activeLeave) { showToast('Student is on leave', true); return; }
     fetch('/admin/fruit/qr', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -263,6 +323,7 @@
   issueEquipBtn.addEventListener('click', function () {
     var id = studentIdInput.value;
     if (!id) { showToast('No student selected', true); return; }
+    if (currentStudent && currentStudent.activeLeave) { showToast('Student is on leave', true); return; }
     var name = window.prompt('Equipment name:');
     if (!name) return;
     openCaptureCamera('Capture Issue Photo', function (issuePhoto) {
@@ -324,4 +385,15 @@
   cancelCaptureBtn.addEventListener('click', function () {
     stopCaptureCamera();
   });
+
+  function autoStartScanner() {
+    startBtn.style.display = 'none';
+    startScanner();
+  }
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', autoStartScanner);
+  } else {
+    autoStartScanner();
+  }
 })();

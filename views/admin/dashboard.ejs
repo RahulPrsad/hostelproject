@@ -12,10 +12,18 @@
     <%- include('../partials/sidebar') %>
     <main class="min-w-0 flex-1 p-4 md:p-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Total Students</p>
           <p class="text-2xl font-semibold"><%= totalStudents %></p>
+        </div>
+        <div class="rounded-lg bg-white p-4 shadow">
+          <p class="text-gray-600 text-sm">Present Today</p>
+          <p class="text-2xl font-semibold text-green-700"><%= presentStudents %></p>
+        </div>
+        <div class="rounded-lg bg-white p-4 shadow">
+          <p class="text-gray-600 text-sm">On Leave Today</p>
+          <p class="text-2xl font-semibold text-amber-700"><%= onLeaveStudents %></p>
         </div>
         <div class="rounded-lg bg-white p-4 shadow">
           <p class="text-gray-600 text-sm">Pending Students</p>
