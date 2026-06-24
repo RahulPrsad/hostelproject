@@ -8,7 +8,7 @@
       <a href="/admin/fruit" class="rounded-xl bg-white/10 px-3 py-2 text-center text-sm">Fruit</a>
       <a href="/admin/equipment" class="rounded-xl bg-white/10 px-3 py-2 text-center text-sm">Equipment</a>
       <a href="/admin/complaints" class="rounded-xl bg-white/10 px-3 py-2 text-center text-sm">Complaints</a>
-      <a href="/admin/report/weekly" class="rounded-xl bg-white/10 px-3 py-2 text-center text-sm">Report</a>
+      <a href="/admin/report" class="rounded-xl bg-white/10 px-3 py-2 text-center text-sm">Report</a>
     <% } else if (user && user.role === 'student') { %>
       <a href="/student/dashboard" class="rounded-xl bg-white/10 px-3 py-2 text-center text-sm">Dashboard</a>
       <a href="/student/leave" class="rounded-xl bg-white/10 px-3 py-2 text-center text-sm">Leave</a>
@@ -27,7 +27,7 @@
       <a href="/admin/fruit" class="block rounded-xl px-3 py-2 hover:bg-white/10">Issue Fruit</a>
       <a href="/admin/equipment" class="block rounded-xl px-3 py-2 hover:bg-white/10">Equipment</a>
       <a href="/admin/complaints" class="block rounded-xl px-3 py-2 hover:bg-white/10">Complaints</a>
-      <a href="/admin/report/weekly" class="block rounded-xl px-3 py-2 hover:bg-white/10" target="_blank">Weekly Report (PDF)</a>
+      <a href="/admin/report" class="block rounded-xl px-3 py-2 hover:bg-white/10">Report</a>
     <% } else if (user && user.role === 'student') { %>
       <a href="/student/dashboard" class="block rounded-xl px-3 py-2 hover:bg-white/10">Dashboard</a>
       <a href="/student/leave" class="block rounded-xl px-3 py-2 hover:bg-white/10">Apply Leave</a>

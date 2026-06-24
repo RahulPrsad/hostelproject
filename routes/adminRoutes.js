@@ -34,6 +34,8 @@ router.post('/equipment/:id/return/qr', adminController.returnEquipmentByQR);
 router.post('/equipment/:id/damage', adminController.logDamage);
 router.get('/complaints', adminController.complaints);
 router.post('/complaints/:id/resolve', adminController.resolveComplaint);
+router.get('/report', adminController.reportPage);
+router.get('/report/generate', adminController.generateReport);
 router.get('/report/weekly', adminController.weeklyReport);
 
 module.exports = router;

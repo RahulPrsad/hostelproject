@@ -4,7 +4,7 @@ const Equipment = require('../models/Equipment');
 const FruitDistribution = require('../models/FruitDistribution');
 const Complaint = require('../models/Complaint');
 const { validationResult } = require('express-validator');
-const { generateWeeklyPDF } = require('../utils/pdfReport');
+const { generateReportPDF, generateWeeklyPDF } = require('../utils/pdfReport');
 const { cleanupExpiredEquipmentPhotos, getPhotoExpiryDate } = require('../utils/equipmentPhotoRetention');
 
 exports.dashboard = async (req, res) => {
@@ -195,6 +195,43 @@ exports.complaints = async (req, res) => {
 exports.resolveComplaint = async (req, res) => {
   await Complaint.findByIdAndUpdate(req.params.id, { status: 'resolved' });
   return res.redirect('/admin/complaints?success=Complaint resolved');
+};
+
+function parseReportDate(value, endOfDay = false) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  if (endOfDay) date.setHours(23, 59, 59, 999);
+  return date;
+}
+
+exports.reportPage = (req, res) => {
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  res.render('admin/report', {
+    user: req.user,
+    defaultFrom: weekAgo.toISOString().slice(0, 10),
+    defaultTo: today.toISOString().slice(0, 10),
+    navbar: true,
+    sidebar: true,
+  });
+};
+
+exports.generateReport = async (req, res) => {
+  const start = parseReportDate(req.query.from);
+  const end = parseReportDate(req.query.to, true);
+  if (!start || !end || start > end) {
+    return res.status(400).send('Invalid report date range');
+  }
+
+  const doc = await generateReportPDF({ start, end });
+  const filename = `hostel-report-${req.query.from}-to-${req.query.to}.pdf`;
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+  res.setHeader('Cache-Control', 'no-store');
+  doc.pipe(res);
+  doc.end();
 };
 
 exports.weeklyReport = async (req, res) => {
