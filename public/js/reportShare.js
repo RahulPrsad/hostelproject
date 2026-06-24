@@ -28,12 +28,25 @@
       return true;
     }
 
-    if (window.HostelAdminApp && typeof window.HostelAdminApp.shareReportUrl === 'function') {
-      window.HostelAdminApp.shareReportUrl(new URL(url, window.location.origin).href);
+    if (window.HostelAdminApp && typeof window.HostelAdminApp.shareReportPdf === 'function') {
+      const base64 = await blobToBase64(blob);
+      window.HostelAdminApp.shareReportPdf(filename, base64);
       return true;
     }
 
     return false;
+  }
+
+  function blobToBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        const result = String(reader.result || '');
+        resolve(result.includes(',') ? result.split(',')[1] : result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   form.addEventListener('submit', async function (event) {

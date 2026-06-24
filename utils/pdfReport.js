@@ -1,7 +1,10 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
 const Leave = require('../models/Leave');
 const Equipment = require('../models/Equipment');
 const FruitDistribution = require('../models/FruitDistribution');
+
+const LOGO_PATH = path.join(__dirname, '..', 'public', 'images', 'ramdeobaba-university-logo.png');
 
 const getWeekRange = () => {
   const end = new Date();
@@ -14,6 +17,24 @@ const getWeekRange = () => {
 const generateReportPDF = async ({ start, end } = {}) => {
   const doc = new PDFDocument({ margin: 50 });
   const range = start && end ? { start, end } : getWeekRange();
+
+  function addBranding() {
+    const centerX = doc.page.width / 2;
+    doc.save();
+    doc.opacity(0.08);
+    doc.image(LOGO_PATH, centerX - 170, 190, { width: 340 });
+    doc.restore();
+
+    doc.image(LOGO_PATH, 50, 38, { width: 54 });
+    doc.fontSize(10).fillColor('#0f172a').text('Ramdeobaba University', 112, 45);
+    doc.fontSize(8).fillColor('#475569').text('Hostel Management Report', 112, 60);
+    doc.moveTo(50, 100).lineTo(doc.page.width - 50, 100).strokeColor('#cbd5e1').stroke();
+    doc.fillColor('#0f172a');
+  }
+
+  doc.on('pageAdded', addBranding);
+  addBranding();
+  doc.y = 120;
 
   doc.fontSize(20).text('Hostel Report', { align: 'center' });
   doc.moveDown();
