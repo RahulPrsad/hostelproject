@@ -16,10 +16,18 @@
         <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"><%= success %></div>
       <% } %>
       <% const yearGroups = ['1', '2', '3', '4']; %>
+      <div class="mb-4 flex flex-wrap gap-2">
+        <% yearGroups.forEach(year => { %>
+          <% const yearCount = leaves.filter(l => String((l.studentId && l.studentId.year) || '').trim() === year || String((l.studentId && l.studentId.year) || '').trim() === year + ' Year').length; %>
+          <button type="button" data-year-tab="<%= year %>" class="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Year <%= year %> <span class="text-slate-500">(<%= yearCount %>)</span>
+          </button>
+        <% }); %>
+      </div>
       <div class="space-y-6">
         <% yearGroups.forEach(year => { %>
           <% const yearLeaves = leaves.filter(l => String((l.studentId && l.studentId.year) || '').trim() === year || String((l.studentId && l.studentId.year) || '').trim() === year + ' Year'); %>
-          <section class="bg-white rounded-lg shadow overflow-hidden">
+          <section data-year-panel="<%= year %>" class="hidden bg-white rounded-lg shadow overflow-hidden">
             <div class="border-b bg-gray-50 px-4 py-3">
               <h2 class="font-semibold text-gray-800">Year <%= year %> Leave Applications</h2>
             </div>
@@ -68,6 +76,36 @@
   </div>
   <%- include('../partials/footer') %>
   <script>
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-year-tab]'));
+      var panels = Array.prototype.slice.call(document.querySelectorAll('[data-year-panel]'));
+      var initialYear = '1';
+      var focusedRow = document.querySelector('tr.bg-indigo-50');
+      if (focusedRow) {
+        var focusedPanel = focusedRow.closest('[data-year-panel]');
+        if (focusedPanel) initialYear = focusedPanel.getAttribute('data-year-panel');
+      }
+
+      function selectYear(year) {
+        tabs.forEach(function (tab) {
+          var active = tab.getAttribute('data-year-tab') === year;
+          tab.className = active
+            ? 'rounded border border-indigo-600 bg-indigo-600 px-4 py-2 text-sm font-medium text-white'
+            : 'rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50';
+        });
+        panels.forEach(function (panel) {
+          panel.classList.toggle('hidden', panel.getAttribute('data-year-panel') !== year);
+        });
+      }
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          selectYear(tab.getAttribute('data-year-tab'));
+        });
+      });
+      selectYear(initialYear);
+    })();
+
     document.querySelectorAll('[data-call-parent-for]').forEach(function (link) {
       link.addEventListener('click', function () {
         var id = link.getAttribute('data-call-parent-for');
