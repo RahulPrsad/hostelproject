@@ -1,6 +1,9 @@
 <nav class="border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
   <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-    <a href="<%= user && user.role === 'admin' ? '/admin/dashboard' : (user && user.role === 'student' ? '/student/dashboard' : '/') %>" class="text-base font-semibold tracking-tight text-slate-900 md:text-lg">Hostel Management</a>
+    <a href="<%= user && user.role === 'admin' ? '/admin/dashboard' : (user && user.role === 'student' ? '/student/dashboard' : '/') %>" class="flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight text-slate-900 md:text-lg">
+      <img src="/images/ramdeobaba-university-logo.png" alt="Ramdeobaba University" class="h-9 w-9 shrink-0 rounded-full object-cover">
+      <span class="truncate">Ramdeobaba University Hostel</span>
+    </a>
     <div class="flex items-center gap-2 text-sm md:gap-4">
         <% if (typeof user !== 'undefined' && user) { %>
           <span class="hidden rounded-full bg-slate-100 px-3 py-1 text-slate-700 md:inline-flex"><%= user.name %></span>
