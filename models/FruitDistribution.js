@@ -8,5 +8,6 @@ const fruitDistributionSchema = new mongoose.Schema({
 
 fruitDistributionSchema.index({ studentId: 1, date: -1 });
 fruitDistributionSchema.index({ studentId: 1, createdAt: -1 });
+fruitDistributionSchema.index({ date: -1 });
 
 module.exports = mongoose.model('FruitDistribution', fruitDistributionSchema);

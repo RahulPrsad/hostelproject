@@ -10,5 +10,7 @@ const leaveSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 leaveSchema.index({ studentId: 1, createdAt: -1 });
+leaveSchema.index({ status: 1, earlyReturnAt: 1, fromDate: 1, toDate: 1, studentId: 1 });
+leaveSchema.index({ studentId: 1, status: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Leave', leaveSchema);

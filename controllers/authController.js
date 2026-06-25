@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const Student = require('../models/Student');
 const { sendOTP } = require('../utils/email');
 const { generateQRDataURL } = require('../utils/qrGenerator');
@@ -26,7 +27,7 @@ exports.postLogin = async (req, res) => {
   }
   const { email, password } = req.body;
   const user = await Student.findOne({ email }).select('+password');
-  if (!user || !(await require('bcryptjs').compare(password, user.password))) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     return res.render('auth/login', { error: 'Invalid email or password', success: null });
   }
   if (!user.isVerified) {
