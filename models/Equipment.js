@@ -11,7 +11,8 @@ const equipmentSchema = new mongoose.Schema({
   damageStatus: { type: String, trim: true, default: '' },
 }, { timestamps: true });
 
-equipmentSchema.index({ studentId: 1 });
+equipmentSchema.index({ studentId: 1, returnDate: 1, issueDate: -1 });
 equipmentSchema.index({ photosExpireAt: 1 });
+equipmentSchema.index({ returnDate: 1 });
 
 module.exports = mongoose.model('Equipment', equipmentSchema);

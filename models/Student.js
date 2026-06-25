@@ -19,6 +19,9 @@ const studentSchema = new mongoose.Schema({
   otpExpires: { type: Date, default: null },
 }, { timestamps: true });
 
+studentSchema.index({ role: 1, approvalStatus: 1 });
+studentSchema.index({ role: 1, isVerified: 1, approvalStatus: 1 });
+
 studentSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
