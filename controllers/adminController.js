@@ -58,14 +58,12 @@ async function ensureFruitNotIssuedToday(studentId) {
 
 exports.dashboard = async (req, res) => {
   await cleanupExpiredEquipmentPhotos();
+  const activeLeaveStudentIds = await Leave.distinct('studentId', getActiveLeaveQuery());
   const startOfWeek = new Date();
   startOfWeek.setHours(0, 0, 0, 0);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-  const activeLeaveStudentIds = await Leave.distinct('studentId', getActiveLeaveQuery());
-  const [totalStudents, pendingStudents, pendingLeaves, equipmentIssued, fruitThisWeek, complaintCount] = await Promise.all([
+  const [totalStudents, equipmentIssued, fruitThisWeek, complaintCount] = await Promise.all([
     Student.countDocuments({ role: 'student', approvalStatus: { $ne: 'rejected' } }),
-    Student.countDocuments({ role: 'student', isVerified: true, approvalStatus: 'pending' }),
-    Leave.countDocuments({ status: 'pending' }),
     Equipment.countDocuments({ returnDate: null }),
     FruitDistribution.countDocuments({ date: { $gte: startOfWeek } }),
     Complaint.countDocuments({ status: 'open' }),
@@ -77,8 +75,6 @@ exports.dashboard = async (req, res) => {
     totalStudents,
     presentStudents,
     onLeaveStudents,
-    pendingStudents,
-    pendingLeaves,
     equipmentIssued,
     fruitThisWeek,
     complaintCount,
@@ -88,8 +84,40 @@ exports.dashboard = async (req, res) => {
 };
 
 exports.students = async (req, res) => {
-  const students = await Student.find({ role: 'student' }).select('-password -otp -qrCode').sort({ createdAt: -1 });
-  res.render('admin/students', { user: req.user, students, success: req.query.success, error: req.query.error, navbar: true, sidebar: true });
+  const view = (req.query.status || 'all').toLowerCase();
+  const activeLeaveStudentIds = await Leave.distinct('studentId', getActiveLeaveQuery());
+  let query = { role: 'student' };
+  let pageTitle = 'All Students';
+
+  if (view === 'present') {
+    query = {
+      role: 'student',
+      approvalStatus: 'approved',
+      isVerified: true,
+      _id: { $nin: activeLeaveStudentIds },
+    };
+    pageTitle = 'Present Students';
+  } else if (view === 'on-leave') {
+    query = {
+      role: 'student',
+      approvalStatus: 'approved',
+      isVerified: true,
+      _id: { $in: activeLeaveStudentIds },
+    };
+    pageTitle = 'On Leave Students';
+  }
+
+  const students = await Student.find(query).select('-password -otp -qrCode').sort({ createdAt: -1 });
+  res.render('admin/students', {
+    user: req.user,
+    students,
+    pageTitle,
+    activeView: view,
+    success: req.query.success,
+    error: req.query.error,
+    navbar: true,
+    sidebar: true,
+  });
 };
 
 exports.approveStudent = async (req, res) => {
