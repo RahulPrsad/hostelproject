@@ -25,7 +25,7 @@ exports.postLogin = async (req, res) => {
     return res.render('auth/login', { error: errors.array()[0].msg, success: null });
   }
   const { email, password } = req.body;
-  const user = await Student.findOne({ email }).select('+password');
+  const user = await Student.findOne({ email }).select('+password role isVerified approvalStatus');
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return res.render('auth/login', { error: 'Invalid email or password', success: null });
   }
@@ -56,7 +56,7 @@ exports.postRegister = async (req, res) => {
     return res.render('auth/register', { error: errors.array()[0].msg });
   }
   const { name, email, password, parentName, parentPhone, branch, year } = req.body;
-  const existing = await Student.findOne({ email });
+  const existing = await Student.findOne({ email }).select('role isVerified approvalStatus');
   if (existing) {
     if (existing.role === 'student' && existing.approvalStatus === 'rejected') {
       await Student.deleteOne({ _id: existing._id });
