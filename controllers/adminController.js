@@ -6,6 +6,7 @@ const Complaint = require('../models/Complaint');
 const { validationResult } = require('express-validator');
 const { generateReportPDF, generateWeeklyPDF } = require('../utils/pdfReport');
 const { cleanupExpiredEquipmentPhotos, getPhotoExpiryDate } = require('../utils/equipmentPhotoRetention');
+const { generateQRDataURL } = require('../utils/qrGenerator');
 
 function getTodayRange() {
   const start = new Date();
@@ -128,6 +129,9 @@ exports.approveStudent = async (req, res) => {
   student.approvalStatus = 'approved';
   student.approvedAt = new Date();
   student.approvedBy = req.user._id;
+  if (!student.qrCode) {
+    student.qrCode = await generateQRDataURL(student._id.toString());
+  }
   await student.save();
   return res.redirect('/admin/students?success=Student approved');
 };
@@ -135,12 +139,14 @@ exports.approveStudent = async (req, res) => {
 exports.rejectStudent = async (req, res) => {
   const student = await Student.findOne({ _id: req.params.id, role: 'student' });
   if (!student) return res.redirect('/admin/students?error=Student not found');
-
-  student.approvalStatus = 'rejected';
-  student.approvedAt = null;
-  student.approvedBy = null;
-  await student.save();
-  return res.redirect('/admin/students?success=Student rejected');
+  await Promise.all([
+    Leave.deleteMany({ studentId: student._id }),
+    Equipment.deleteMany({ studentId: student._id }),
+    FruitDistribution.deleteMany({ studentId: student._id }),
+    Complaint.deleteMany({ studentId: student._id }),
+    Student.deleteOne({ _id: student._id }),
+  ]);
+  return res.redirect('/admin/students?success=Student removed from database');
 };
 
 exports.leaves = async (req, res) => {

@@ -4,6 +4,7 @@ const FruitDistribution = require('../models/FruitDistribution');
 const Complaint = require('../models/Complaint');
 const { validationResult } = require('express-validator');
 const { cleanupExpiredEquipmentPhotos, getPhotoExpiryDate } = require('../utils/equipmentPhotoRetention');
+const { generateQRDataURL, generateQRBuffer } = require('../utils/qrGenerator');
 
 exports.dashboard = async (req, res) => {
   await cleanupExpiredEquipmentPhotos();
@@ -37,6 +38,22 @@ exports.postLeave = async (req, res) => {
     return res.render('student/leave', { user: req.user, leaves, error: errors.array()[0].msg, navbar: true, sidebar: true });
   }
   const { fromDate, toDate, reason } = req.body;
+  const start = new Date(fromDate);
+  const end = new Date(toDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    const leaves = await Leave.find({ studentId: req.user._id }).sort({ createdAt: -1 });
+    return res.render('student/leave', { user: req.user, leaves, error: 'Invalid leave dates', navbar: true, sidebar: true });
+  }
+  if (start < today) {
+    const leaves = await Leave.find({ studentId: req.user._id }).sort({ createdAt: -1 });
+    return res.render('student/leave', { user: req.user, leaves, error: 'From date must be today or later', navbar: true, sidebar: true });
+  }
+  if (end <= start) {
+    const leaves = await Leave.find({ studentId: req.user._id }).sort({ createdAt: -1 });
+    return res.render('student/leave', { user: req.user, leaves, error: 'To date must be after from date', navbar: true, sidebar: true });
+  }
   await Leave.create({ studentId: req.user._id, fromDate, toDate, reason });
   return res.redirect('/student/leave?success=Leave applied');
 };
@@ -81,6 +98,29 @@ exports.returnEquipment = async (req, res) => {
   return res.redirect('/student/equipment?success=Equipment submitted');
 };
 
-exports.myQR = (req, res) => {
-  res.render('student/myQR', { user: req.user, navbar: true, sidebar: true });
+exports.myQR = async (req, res) => {
+  let user = req.user;
+  if (!user.qrCode) {
+    user.qrCode = await generateQRDataURL(user._id.toString());
+    await require('../models/Student').findByIdAndUpdate(user._id, { qrCode: user.qrCode });
+  }
+  res.render('student/myQR', { user, navbar: true, sidebar: true });
+};
+
+exports.downloadQR = async (req, res) => {
+  const StudentModel = require('../models/Student');
+  const student = await StudentModel.findById(req.user._id).select('qrCode');
+  if (!student) return res.status(404).send('Student not found');
+
+  let qrBuffer;
+  if (student.qrCode) {
+    const base64 = student.qrCode.split(',')[1];
+    qrBuffer = Buffer.from(base64, 'base64');
+  } else {
+    qrBuffer = await generateQRBuffer(req.user._id.toString());
+  }
+
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Content-Disposition', 'attachment; filename="my-qr.png"');
+  return res.send(qrBuffer);
 };

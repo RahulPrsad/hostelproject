@@ -24,5 +24,6 @@ router.get('/fruit-history', studentController.fruitHistory);
 router.get('/equipment', studentController.equipment);
 router.post('/equipment/:id/return', studentController.returnEquipment);
 router.get('/my-qr', studentController.myQR);
+router.get('/my-qr/download', studentController.downloadQR);
 
 module.exports = router;

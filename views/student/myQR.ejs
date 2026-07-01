@@ -15,7 +15,7 @@
       <div class="bg-white rounded-lg shadow p-6 max-w-sm">
         <% if (user.qrCode) { %>
           <img src="<%= user.qrCode %>" alt="QR Code" class="w-64 h-64 mx-auto block border rounded">
-          <a href="<%= user.qrCode %>" download="my-qr.png" class="mt-4 block text-center text-indigo-600 hover:underline">Download QR Code</a>
+          <a href="/student/my-qr/download" class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Download QR Code</a>
         <% } else { %>
           <p class="text-gray-500">QR code not generated. Please complete verification.</p>
         <% } %>
