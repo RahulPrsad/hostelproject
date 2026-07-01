@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Student = require('../models/Student');
 const { sendOTP } = require('../utils/email');
-const { generateQRDataURL } = require('../utils/qrGenerator');
 const { validationResult } = require('express-validator');
 
 const generateToken = (id, role) => {
@@ -59,13 +58,15 @@ exports.postRegister = async (req, res) => {
   const { name, email, password, parentName, parentPhone, branch, year } = req.body;
   const existing = await Student.findOne({ email });
   if (existing) {
-    if (existing.role === 'student' && !existing.isVerified) {
+    if (existing.role === 'student' && existing.approvalStatus === 'rejected') {
+      await Student.deleteOne({ _id: existing._id });
+    } else if (existing.role === 'student' && !existing.isVerified) {
       return res.redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
-    }
-    if (existing.role === 'student' && existing.approvalStatus === 'pending') {
+    } else if (existing.role === 'student' && existing.approvalStatus === 'pending') {
       return res.render('auth/register', { error: 'Your registration is already waiting for admin approval' });
+    } else {
+      return res.render('auth/register', { error: 'Email already registered' });
     }
-    return res.render('auth/register', { error: 'Email already registered' });
   }
   const otp = String(Math.floor(100000 + Math.random() * 900000));
   const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
@@ -123,8 +124,6 @@ exports.postVerifyOTP = async (req, res) => {
   user.isVerified = true;
   user.otp = null;
   user.otpExpires = null;
-  const qrDataURL = await generateQRDataURL(user._id.toString());
-  user.qrCode = qrDataURL;
   if (!user.approvalStatus) {
     user.approvalStatus = 'pending';
   }
@@ -133,6 +132,24 @@ exports.postVerifyOTP = async (req, res) => {
     email,
     name: user.name,
   });
+};
+
+exports.getQrDownload = async (req, res) => {
+  const StudentModel = require('../models/Student');
+  const { generateQRBuffer } = require('../utils/qrGenerator');
+  const student = await StudentModel.findById(req.user._id).select('qrCode');
+  if (!student) return res.status(404).send('Student not found');
+  if (!student.qrCode) {
+    const qrBuffer = await generateQRBuffer(req.user._id.toString());
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', 'attachment; filename="my-qr.png"');
+    return res.send(qrBuffer);
+  }
+  const base64 = student.qrCode.split(',')[1];
+  const buffer = Buffer.from(base64, 'base64');
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Content-Disposition', 'attachment; filename="my-qr.png"');
+  return res.send(buffer);
 };
 
 exports.logout = (req, res) => {
