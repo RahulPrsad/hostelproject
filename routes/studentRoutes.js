@@ -1,13 +1,23 @@
 const express = require('express');
 const { body } = require('express-validator');
+const connectDB = require('../config/db');
 const { protect } = require('../middleware/auth');
 const { requireStudent } = require('../middleware/roleCheck');
 const studentController = require('../controllers/studentController');
 
 const router = express.Router();
+const ensureDb = async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 
 router.use(protect);
 router.use(requireStudent);
+router.use(ensureDb);
 
 router.get('/dashboard', studentController.dashboard);
 router.get('/leave', studentController.getLeave);

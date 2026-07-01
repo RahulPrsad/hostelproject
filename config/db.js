@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 let cachedConnection = null;
 let cachedPromise = null;
 
+mongoose.set('bufferCommands', false);
+
 const connectDB = async () => {
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/hostel_db';
 
