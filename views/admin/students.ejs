@@ -21,54 +21,98 @@
       <% if (typeof error !== 'undefined' && error) { %>
         <div class="mb-4 p-3 bg-red-100 text-red-700 rounded"><%= error %></div>
       <% } %>
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Name</th><th class="text-left p-3">Email</th><th class="text-left p-3">Branch</th><th class="text-left p-3">Year</th><th class="text-left p-3">Parent</th><th class="text-left p-3">Status</th><th class="text-left p-3">Call</th><th class="text-left p-3">Action</th></tr></thead>
-            <tbody>
-              <% students.forEach(s => { %>
-                <tr class="border-b">
-                  <td class="p-3"><%= s.name %></td>
-                  <td class="p-3"><%= s.email %></td>
-                  <td class="p-3"><%= s.branch || '-' %></td>
-                  <td class="p-3"><%= s.year || '-' %></td>
-                  <td class="p-3"><%= s.parentName || '-' %></td>
-                  <td class="p-3">
-                    <% const status = s.approvalStatus || 'approved'; %>
-                    <% if (!s.isVerified) { %>
-                      <span class="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs">OTP pending</span>
-                    <% } else if (status === 'approved') { %>
-                      <span class="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">Approved</span>
-                    <% } else if (status === 'rejected') { %>
-                      <span class="px-2 py-1 rounded bg-red-100 text-red-800 text-xs">Rejected</span>
-                    <% } else { %>
-                      <span class="px-2 py-1 rounded bg-indigo-100 text-indigo-800 text-xs">Approval pending</span>
-                    <% } %>
-                  </td>
-                  <td class="p-3"><%= s.parentPhone || '-' %></td>
-                  <td class="p-3 align-top">
-                    <div class="flex flex-wrap gap-2">
-                      <% if (s.isVerified && status !== 'approved') { %>
-                        <form action="/admin/students/<%= s._id %>/approve" method="POST" class="inline">
-                          <button class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
-                        </form>
-                      <% } %>
-                      <% if (status !== 'rejected') { %>
-                        <form action="/admin/students/<%= s._id %>/reject" method="POST" class="inline">
-                          <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
-                        </form>
-                      <% } %>
-                    </div>
-                  </td>
-                </tr>
-              <% }); %>
-              <% if (students.length === 0) { %><tr><td colspan="8" class="p-4 text-gray-500">No students</td></tr><% } %>
-            </tbody>
-          </table>
-        </div>
+      <% const yearGroups = ['1', '2', '3', '4']; %>
+      <% const normalizeYear = (value) => String(value || '').trim(); %>
+      <div class="mb-4 flex flex-wrap gap-2">
+        <% yearGroups.forEach(year => { %>
+          <% const yearCount = students.filter(s => normalizeYear(s.year) === year || normalizeYear(s.year) === year + ' Year').length; %>
+          <button type="button" data-year-tab="<%= year %>" class="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Year <%= year %> <span class="text-slate-500">(<%= yearCount %>)</span>
+          </button>
+        <% }); %>
+      </div>
+      <div class="space-y-6">
+        <% yearGroups.forEach(year => { %>
+          <% const yearStudents = students.filter(s => normalizeYear(s.year) === year || normalizeYear(s.year) === year + ' Year'); %>
+          <section data-year-panel="<%= year %>" class="hidden bg-white rounded-lg shadow overflow-hidden">
+            <div class="border-b bg-gray-50 px-4 py-3">
+              <h2 class="font-semibold text-gray-800">Year <%= year %> Students</h2>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead><tr class="bg-gray-50 border-b"><th class="text-left p-3">Name</th><th class="text-left p-3">Email</th><th class="text-left p-3">Branch</th><th class="text-left p-3">Year</th><th class="text-left p-3">Parent</th><th class="text-left p-3">Status</th><th class="text-left p-3">Call</th><th class="text-left p-3">Action</th></tr></thead>
+                <tbody>
+                  <% yearStudents.forEach(s => { %>
+                    <tr class="border-b">
+                      <td class="p-3"><%= s.name %></td>
+                      <td class="p-3"><%= s.email %></td>
+                      <td class="p-3"><%= s.branch || '-' %></td>
+                      <td class="p-3"><%= s.year || '-' %></td>
+                      <td class="p-3"><%= s.parentName || '-' %></td>
+                      <td class="p-3">
+                        <% const status = s.approvalStatus || 'approved'; %>
+                        <% if (!s.isVerified) { %>
+                          <span class="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs">OTP pending</span>
+                        <% } else if (status === 'approved') { %>
+                          <span class="px-2 py-1 rounded bg-green-100 text-green-800 text-xs">Approved</span>
+                        <% } else if (status === 'rejected') { %>
+                          <span class="px-2 py-1 rounded bg-red-100 text-red-800 text-xs">Rejected</span>
+                        <% } else { %>
+                          <span class="px-2 py-1 rounded bg-indigo-100 text-indigo-800 text-xs">Approval pending</span>
+                        <% } %>
+                      </td>
+                      <td class="p-3"><%= s.parentPhone || '-' %></td>
+                      <td class="p-3 align-top">
+                        <div class="flex flex-wrap gap-2">
+                          <% if (s.isVerified && status !== 'approved') { %>
+                            <form action="/admin/students/<%= s._id %>/approve" method="POST" class="inline">
+                              <button class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
+                            </form>
+                          <% } %>
+                          <% if (status !== 'rejected') { %>
+                            <form action="/admin/students/<%= s._id %>/reject" method="POST" class="inline">
+                              <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
+                            </form>
+                          <% } %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }); %>
+                  <% if (yearStudents.length === 0) { %><tr><td colspan="8" class="p-4 text-gray-500">No students for year <%= year %></td></tr><% } %>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        <% }); %>
       </div>
     </main>
   </div>
   <%- include('../partials/footer') %>
+  <script>
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-year-tab]'));
+      var panels = Array.prototype.slice.call(document.querySelectorAll('[data-year-panel]'));
+
+      function selectYear(year) {
+        tabs.forEach(function (tab) {
+          var active = tab.getAttribute('data-year-tab') === year;
+          tab.className = active
+            ? 'rounded border border-indigo-600 bg-indigo-600 px-4 py-2 text-sm font-medium text-white'
+            : 'rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50';
+        });
+        panels.forEach(function (panel) {
+          panel.classList.toggle('hidden', panel.getAttribute('data-year-panel') !== year);
+        });
+      }
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          selectYear(tab.getAttribute('data-year-tab'));
+        });
+      });
+
+      selectYear(tabs.length ? tabs[0].getAttribute('data-year-tab') : '1');
+    })();
+  </script>
 </body>
 </html>
