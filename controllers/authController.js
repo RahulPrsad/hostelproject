@@ -148,7 +148,7 @@ exports.getQrDownload = async (req, res) => {
   const base64 = student.qrCode.split(',')[1];
   const buffer = Buffer.from(base64, 'base64');
   res.setHeader('Content-Type', 'image/png');
-  res.setHeader('Content-Disposition', 'attachment; filename="my-qr.png"');
+  res.setHeader('Content-Disposition', 'inline; filename="my-qr.png"');
   return res.send(buffer);
 };
 

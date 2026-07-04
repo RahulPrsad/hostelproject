@@ -55,14 +55,26 @@
       const fromDate = document.getElementById('fromDate');
       const toDate = document.getElementById('toDate');
       if (!fromDate || !toDate) return;
+      const pad = (value) => String(value).padStart(2, '0');
+      const formatLocalDate = (date) => {
+        return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+      };
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const min = today.toISOString().slice(0, 10);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const min = formatLocalDate(today);
+      const nextDay = formatLocalDate(tomorrow);
       fromDate.min = min;
-      toDate.min = min;
+      fromDate.max = min;
+      fromDate.value = min;
+      toDate.min = nextDay;
       fromDate.addEventListener('change', function () {
-        toDate.min = this.value || min;
-        if (toDate.value && this.value && toDate.value <= this.value) {
+        if (this.value && this.value !== min) {
+          this.value = min;
+        }
+        toDate.min = nextDay;
+        if (toDate.value && toDate.value < nextDay) {
           toDate.value = '';
         }
       });
