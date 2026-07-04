@@ -70,7 +70,7 @@
                             </form>
                           <% } %>
                           <% if (status !== 'rejected') { %>
-                            <form action="/admin/students/<%= s._id %>/reject" method="POST" class="inline">
+                            <form action="/admin/students/<%= s._id %>/reject" method="POST" class="inline" data-confirm-reject data-confirm-message="Are you sure you want to reject <%= s.name %>? This will remove the student from the database.">
                               <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Reject</button>
                             </form>
                           <% } %>
@@ -88,6 +88,7 @@
     </main>
   </div>
   <%- include('../partials/footer') %>
+  <%- include('../partials/rejectConfirm') %>
   <script>
     (function () {
       var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-year-tab]'));

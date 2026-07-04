@@ -59,7 +59,7 @@
                         <form action="/admin/leaves/<%= l._id %>/approve" method="POST" class="inline">
                           <button type="submit" data-approve-leave="<%= l._id %>" <%= l.studentId && l.studentId.parentPhone ? 'disabled' : '' %> class="text-green-600 hover:underline disabled:text-gray-400 disabled:no-underline">Approve</button>
                         </form>
-                        <form action="/admin/leaves/<%= l._id %>/reject" method="POST" class="inline"><button type="submit" class="text-red-600 hover:underline">Reject</button></form>
+                        <form action="/admin/leaves/<%= l._id %>/reject" method="POST" class="inline" data-confirm-reject data-confirm-message="Are you sure you want to reject this leave request?"><button type="submit" class="text-red-600 hover:underline">Reject</button></form>
                       </div>
                     <% } else { %>-<% } %>
                   </td>
@@ -75,6 +75,7 @@
     </main>
   </div>
   <%- include('../partials/footer') %>
+  <%- include('../partials/rejectConfirm') %>
   <script>
     (function () {
       var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-year-tab]'));
