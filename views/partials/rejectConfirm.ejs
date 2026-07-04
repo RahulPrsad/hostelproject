@@ -1,0 +1,49 @@
+<div id="rejectConfirmOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4">
+  <div class="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl">
+    <h2 class="text-lg font-semibold text-gray-900">Are you sure?</h2>
+    <p id="rejectConfirmMessage" class="mt-2 text-sm text-gray-600">This action cannot be undone.</p>
+    <div class="mt-5 flex justify-end gap-3">
+      <button type="button" id="rejectConfirmCancel" class="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+      <button type="button" id="rejectConfirmSubmit" class="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">Reject</button>
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    var overlay = document.getElementById('rejectConfirmOverlay');
+    var message = document.getElementById('rejectConfirmMessage');
+    var cancelBtn = document.getElementById('rejectConfirmCancel');
+    var submitBtn = document.getElementById('rejectConfirmSubmit');
+    var pendingForm = null;
+
+    if (!overlay || !message || !cancelBtn || !submitBtn) return;
+
+    function closeConfirm() {
+      pendingForm = null;
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+    }
+
+    document.querySelectorAll('form[data-confirm-reject]').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        pendingForm = form;
+        message.textContent = form.getAttribute('data-confirm-message') || 'This action cannot be undone.';
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      });
+    });
+
+    cancelBtn.addEventListener('click', closeConfirm);
+    overlay.addEventListener('click', function (event) {
+      if (event.target === overlay) closeConfirm();
+    });
+    submitBtn.addEventListener('click', function () {
+      if (pendingForm) {
+        var form = pendingForm;
+        pendingForm = null;
+        form.submit();
+      }
+    });
+  })();
+</script>
