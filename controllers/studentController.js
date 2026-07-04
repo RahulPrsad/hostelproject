@@ -6,6 +6,13 @@ const { validationResult } = require('express-validator');
 const { cleanupExpiredEquipmentPhotos, getPhotoExpiryDate } = require('../utils/equipmentPhotoRetention');
 const { generateQRDataURL, generateQRBuffer } = require('../utils/qrGenerator');
 
+const formatLocalDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 exports.dashboard = async (req, res) => {
   await cleanupExpiredEquipmentPhotos();
   const studentId = req.user._id;
@@ -38,21 +45,23 @@ exports.postLeave = async (req, res) => {
     return res.render('student/leave', { user: req.user, leaves, error: errors.array()[0].msg, navbar: true, sidebar: true });
   }
   const { fromDate, toDate, reason } = req.body;
-  const start = new Date(fromDate);
-  const end = new Date(toDate);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+  const todayStr = formatLocalDate(today);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = formatLocalDate(tomorrow);
+  if (!fromDate || !toDate) {
     const leaves = await Leave.find({ studentId: req.user._id }).sort({ createdAt: -1 });
     return res.render('student/leave', { user: req.user, leaves, error: 'Invalid leave dates', navbar: true, sidebar: true });
   }
-  if (start < today) {
+  if (fromDate !== todayStr) {
     const leaves = await Leave.find({ studentId: req.user._id }).sort({ createdAt: -1 });
-    return res.render('student/leave', { user: req.user, leaves, error: 'From date must be today or later', navbar: true, sidebar: true });
+    return res.render('student/leave', { user: req.user, leaves, error: 'From date must be today', navbar: true, sidebar: true });
   }
-  if (end <= start) {
+  if (toDate < tomorrowStr) {
     const leaves = await Leave.find({ studentId: req.user._id }).sort({ createdAt: -1 });
-    return res.render('student/leave', { user: req.user, leaves, error: 'To date must be after from date', navbar: true, sidebar: true });
+    return res.render('student/leave', { user: req.user, leaves, error: 'To date must be after today', navbar: true, sidebar: true });
   }
   await Leave.create({ studentId: req.user._id, fromDate, toDate, reason });
   return res.redirect('/student/leave?success=Leave applied');
@@ -121,6 +130,6 @@ exports.downloadQR = async (req, res) => {
   }
 
   res.setHeader('Content-Type', 'image/png');
-  res.setHeader('Content-Disposition', 'attachment; filename="my-qr.png"');
+  res.setHeader('Content-Disposition', 'inline; filename="my-qr.png"');
   return res.send(qrBuffer);
 };
