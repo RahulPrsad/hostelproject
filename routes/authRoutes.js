@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const { body } = require('express-validator');
 const connectDB = require('../config/db');
 const authController = require('../controllers/authController');
+const { branchOptions, yearOptions } = require('../config/programOptions');
 
 const router = express.Router();
 const ensureDb = async (req, res, next) => {
@@ -33,6 +34,8 @@ router.post('/register', ensureDb, authLimiter, [
   body('name').trim().notEmpty().withMessage('Name required'),
   body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('branch').isIn(branchOptions).withMessage('Valid branch required'),
+  body('year').isIn(yearOptions).withMessage('Valid year required'),
 ], authController.postRegister);
 
 router.get('/verify-otp', authController.getVerifyOTP);

@@ -23,11 +23,11 @@
       <form action="/register" method="POST" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Name</label>
-          <input type="text" name="name" required class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500" placeholder="Full name">
+          <input type="text" name="name" required value="<%= (formData && formData.name) || '' %>" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500" placeholder="Full name">
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Email (official)</label>
-          <input type="email" name="email" required class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500" placeholder="you@college.edu">
+          <input type="email" name="email" required value="<%= (formData && formData.email) || '' %>" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500" placeholder="you@college.edu">
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Password (min 6)</label>
@@ -35,19 +35,29 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Parent Name</label>
-          <input type="text" name="parentName" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500">
+          <input type="text" name="parentName" value="<%= (formData && formData.parentName) || '' %>" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500">
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Parent Phone</label>
-          <input type="text" name="parentPhone" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500" placeholder="10-digit">
+          <input type="text" name="parentPhone" value="<%= (formData && formData.parentPhone) || '' %>" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500" placeholder="10-digit">
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Branch</label>
-          <input type="text" name="branch" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500">
+          <select name="branch" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 focus:ring-2 focus:ring-indigo-500">
+            <option value="">Select branch</option>
+            <% (branchOptions || []).forEach(branch => { %>
+              <option value="<%= branch %>" <%= formData && formData.branch === branch ? 'selected' : '' %>><%= branch %></option>
+            <% }); %>
+          </select>
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700 mb-1">Year</label>
-          <input type="text" name="year" class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:ring-2 focus:ring-indigo-500" placeholder="1/2/3/4">
+          <select name="year" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 focus:ring-2 focus:ring-indigo-500">
+            <option value="">Select year</option>
+            <% (yearOptions || []).forEach(year => { %>
+              <option value="<%= year %>" <%= formData && formData.year === year ? 'selected' : '' %>>Year <%= year %></option>
+            <% }); %>
+          </select>
         </div>
         <button type="submit" class="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-700">Register &amp; Get OTP</button>
       </form>

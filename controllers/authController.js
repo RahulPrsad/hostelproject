@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const Student = require('../models/Student');
 const { sendOTP } = require('../utils/email');
 const { validationResult } = require('express-validator');
+const { branchOptions, yearOptions } = require('../config/programOptions');
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
@@ -47,15 +48,16 @@ exports.postLogin = async (req, res) => {
 };
 
 exports.getRegister = (req, res) => {
-  res.render('auth/register', { error: null });
+  res.render('auth/register', { error: null, branchOptions, yearOptions, formData: {} });
 };
 
 exports.postRegister = async (req, res) => {
+  const { name, email, password, parentName, parentPhone, branch, year } = req.body;
+  const formData = { name, email, parentName, parentPhone, branch, year };
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.render('auth/register', { error: errors.array()[0].msg });
+    return res.render('auth/register', { error: errors.array()[0].msg, branchOptions, yearOptions, formData });
   }
-  const { name, email, password, parentName, parentPhone, branch, year } = req.body;
   const existing = await Student.findOne({ email }).select('role isVerified approvalStatus');
   if (existing) {
     if (existing.role === 'student' && existing.approvalStatus === 'rejected') {
@@ -63,9 +65,9 @@ exports.postRegister = async (req, res) => {
     } else if (existing.role === 'student' && !existing.isVerified) {
       return res.redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
     } else if (existing.role === 'student' && existing.approvalStatus === 'pending') {
-      return res.render('auth/register', { error: 'Your registration is already waiting for admin approval' });
+      return res.render('auth/register', { error: 'Your registration is already waiting for admin approval', branchOptions, yearOptions, formData });
     } else {
-      return res.render('auth/register', { error: 'Email already registered' });
+      return res.render('auth/register', { error: 'Email already registered', branchOptions, yearOptions, formData });
     }
   }
   const otp = String(Math.floor(100000 + Math.random() * 900000));
