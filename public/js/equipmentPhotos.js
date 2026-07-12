@@ -72,11 +72,71 @@
     });
   }
 
+  function bindPhotoViewer(scope) {
+    const overlay = document.getElementById('photoViewerOverlay');
+    const viewerImage = document.getElementById('photoViewerImage');
+    const closeBtn = document.getElementById('photoViewerClose');
+    const zoomInBtn = document.getElementById('photoViewerZoomIn');
+    const zoomOutBtn = document.getElementById('photoViewerZoomOut');
+    if (!overlay || !viewerImage || !closeBtn || !zoomInBtn || !zoomOutBtn) return;
+
+    let zoom = 1;
+
+    function renderZoom() {
+      viewerImage.style.transform = 'scale(' + zoom + ')';
+    }
+
+    function openViewer(src, alt) {
+      zoom = 1;
+      viewerImage.src = src;
+      viewerImage.alt = alt || 'Equipment photo';
+      renderZoom();
+      overlay.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeViewer() {
+      overlay.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+      viewerImage.src = '';
+    }
+
+    scope.querySelectorAll('[data-photo-viewer]').forEach(function (photo) {
+      if (photo.dataset.photoViewerBound === '1') return;
+      photo.dataset.photoViewerBound = '1';
+      photo.addEventListener('click', function () {
+        openViewer(photo.src, photo.alt);
+      });
+    });
+
+    if (overlay.dataset.photoViewerControlsBound === '1') return;
+    overlay.dataset.photoViewerControlsBound = '1';
+
+    closeBtn.addEventListener('click', closeViewer);
+    zoomInBtn.addEventListener('click', function () {
+      zoom = Math.min(4, Math.round((zoom + 0.25) * 100) / 100);
+      renderZoom();
+    });
+    zoomOutBtn.addEventListener('click', function () {
+      zoom = Math.max(0.5, Math.round((zoom - 0.25) * 100) / 100);
+      renderZoom();
+    });
+    overlay.addEventListener('click', function (event) {
+      if (event.target === overlay) closeViewer();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !overlay.classList.contains('hidden')) {
+        closeViewer();
+      }
+    });
+  }
+
   window.EquipmentPhotos = {
     compressImage: compressImage,
     bind: function (scope) {
       bindIssueCapture(scope || document);
       bindReturnCapture(scope || document);
+      bindPhotoViewer(scope || document);
     },
   };
 
