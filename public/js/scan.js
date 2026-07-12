@@ -206,7 +206,8 @@
         var image = document.createElement('img');
         image.src = item.issuePhoto;
         image.alt = item.equipmentName;
-        image.className = 'h-14 w-14 rounded border object-cover';
+        image.className = 'h-14 w-14 cursor-zoom-in rounded border object-cover';
+        image.setAttribute('data-photo-viewer', '');
         details.appendChild(image);
       }
 
@@ -233,6 +234,10 @@
       row.appendChild(button);
       activeEquipmentList.appendChild(row);
     });
+
+    if (window.EquipmentPhotos) {
+      window.EquipmentPhotos.bind(activeEquipmentList);
+    }
   }
 
   function loadActiveEquipment(studentId) {
