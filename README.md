@@ -1,108 +1,398 @@
-# QR-Based Hostel Management System
+# Hostel Management System - version_1.0
+### Secure QR-Based Digital Hostel Management Platform
 
-A web-based hostel management system with QR-based student verification, role-based access (Student & Admin), and weekly PDF reports.
+A modern, full-stack Hostel Management System designed to digitize hostel operations through **QR-based student verification**, **role-based authentication**, **equipment tracking**, **leave management**, **complaint handling**, and **automated reporting**.
 
-## Tech Stack
+The system eliminates manual registers and paper-based workflows by providing administrators with a centralized dashboard while giving students a seamless self-service portal.
 
-- **Frontend:** HTML, CSS, JavaScript, EJS, Tailwind CSS (CDN)
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB (Mongoose)
-- **Auth:** JWT, bcrypt, Nodemailer (OTP)
-- **QR:** qrcode (generation), html5-qrcode (browser scanning)
-- **PDF:** pdfkit
+---
 
-## Prerequisites
+#  Highlights
 
-- Node.js (v18+)
-- MongoDB (local or Atlas)
+-  Secure JWT Authentication
+-  OTP Email Verification
+-  QR Code Based Student Identification
+-  Mobile Friendly Responsive UI
+-  Role-Based Access Control (RBAC)
+-  Real-time Admin Dashboard
+-  Leave Management Workflow
+-  Fruit Distribution Tracking
+-  Sports Equipment Management
+-  Complaint Management System
+-  Weekly PDF Report Generation
+-  Downloadable Personal QR Cards
+-  Cloud Ready Architecture
 
-## Setup
+---
 
-1. **Clone and install**
-
-   ```bash
-   cd hostel-1
-   npm install
-   ```
-
-2. **Environment**
-
-   Copy `.env.example` to `.env` and set:
-
-   ```env
-   PORT=3000
-   MONGODB_URI=mongodb://localhost:27017/hostel_db
-   JWT_SECRET=your-super-secret-jwt-key-change-in-production
-   JWT_EXPIRE=7d
-   NODEMAILER_HOST=smtp.gmail.com
-   NODEMAILER_PORT=587
-   NODEMAILER_USER=your-email@gmail.com
-   NODEMAILER_PASS=your-app-password
-   APP_URL=https://hostelproject-omega.vercel.app/login
-   ```
-
-   For Gmail: use an [App Password](https://support.google.com/accounts/answer/185833), not your normal password.
-
-3. **Database**
-
-   - **Local:** Start MongoDB, then use `MONGODB_URI=mongodb://localhost:27017/hostel_db`.
-   - **Atlas:** Create a cluster, get the connection string, and set it as `MONGODB_URI`.
-
-4. **Create first admin**
-
-   ```bash
-   node scripts/seedAdmin.js
-   ```
-
-   Default admin: `admin@hostel.com` / `admin123`. Override with `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`.
-
-5. **Run**
-
-   ```bash
-   npm run dev
-   ```
-
-   Open your deployed URL. Login as admin or register as a student.
-
-## Features
-
-### Student
-
-- Register with email, OTP verification, login/logout
-- Dashboard, apply for leave, view leave status
-- Raise complaint, view fruit distribution history, view issued equipment
-- View/download personal QR code
-
-### Admin
-
-- Dashboard (totals: students, pending leaves, equipment, fruit this week, complaints)
-- View all students, approve/reject leave
-- Scan QR via webcam, view student details, issue fruit/equipment
-- Issue fruit, issue/return sports equipment, log damage
-- View complaints, mark resolved
-- Weekly PDF report (download)
-- Call parent (clickable phone link on student list)
-
-## Deployment
-
-1. Set all env vars in production (strong `JWT_SECRET`, real MongoDB URI, Nodemailer credentials).
-2. Build: no frontend build step (Tailwind via CDN). For production you may add a Tailwind build and serve compiled CSS.
-3. Process manager: e.g. `pm2 start server.js --name hostel`.
-4. Optional: put Nginx (or similar) in front and proxy to `PORT`.
-
-## Project Structure
+#  System Overview
 
 ```
-/config       - DB connection
-/controllers  - auth, student, admin
-/models       - Student, Leave, Equipment, FruitDistribution, Complaint
-/routes       - auth, student, admin
-/middleware   - auth (JWT), role (student/admin)
-/views        - EJS templates (auth, student, admin)
-/public       - static assets, js (scan, app)
-/utils        - email (OTP), qrGenerator, pdfReport
-scripts       - seedAdmin.js
-server.js
+                    +----------------+
+                    |   Student      |
+                    +--------+-------+
+                             |
+                    Login / Register
+                             |
+                    JWT Authentication
+                             |
+               +-------------+-------------+
+               |                           |
+         Student Dashboard          QR Generation
+               |
+        Leave / Complaint /
+      Equipment / Fruit History
+               |
+               |
+      -----------------------------
+               |
+         MongoDB Database
+               |
+      -----------------------------
+               |
+        Admin Dashboard
+               |
+   QR Scan → Student Verification
+               |
+ Issue Fruit | Equipment | Leave
+ Complaint Resolution | Reports
+```
+
+---
+
+#  Core Features
+
+##  Student Portal
+
+### Authentication
+
+- Secure Registration
+- Email OTP Verification
+- Login & Logout
+- JWT Authentication
+- Password Encryption using bcrypt
+
+### Dashboard
+
+Students can
+
+- View Profile
+- Download Personal QR Code
+- Apply for Leave
+- Track Leave Status
+- Raise Complaints
+- View Complaint History
+- View Fruit Distribution Records
+- View Issued Sports Equipment
+
+---
+
+##  Admin Portal
+
+A centralized control panel to manage hostel activities.
+
+### Dashboard Analytics
+
+Displays
+
+- Total Students
+- Pending Leave Requests
+- Active Complaints
+- Equipment Issued
+- Fruit Distributed This Week
+- Recent Activities
+
+---
+
+### Student Management
+
+- View Student Details
+- Search Students
+- Verify Student QR
+- Contact Parent
+- View Leave History
+- Equipment History
+- Fruit Distribution History
+
+---
+
+### QR Verification
+
+The admin can simply scan the student's QR code using the webcam.
+
+After scanning
+
+- Student Identity Verification
+- Profile Details
+- Room Details
+- Hostel Status
+- Issue Fruit
+- Issue Equipment
+
+Instantly from one screen.
+
+---
+
+### Leave Management
+
+- Approve Leave
+- Reject Leave
+- View Leave History
+- Leave Status Tracking
+
+---
+
+### Equipment Management
+
+- Issue Sports Equipment
+- Return Equipment
+- Mark Equipment Damaged
+- Track Equipment Inventory
+
+---
+
+### Fruit Distribution
+
+- Weekly Distribution
+- Student-wise History
+- Prevent Duplicate Distribution
+
+---
+
+### Complaint Management
+
+- View Complaints
+- Resolve Complaints
+- Complaint Status Tracking
+
+---
+
+### Reporting
+
+Generate downloadable
+
+- Weekly Reports
+- Student Reports
+- Equipment Reports
+- Fruit Distribution Reports
+
+Exported as professionally formatted PDF files.
+
+---
+
+#  Tech Stack
+
+## Frontend
+
+| Technology | Purpose |
+|------------|---------|
+| HTML5 | Structure |
+| CSS3 | Styling |
+| Tailwind CSS | Responsive UI |
+| JavaScript | Client Logic |
+| EJS | Server Side Rendering |
+
+---
+
+## Backend
+
+| Technology | Purpose |
+|------------|---------|
+| Node.js | Runtime |
+| Express.js | REST API |
+| Express Session | Session Handling |
+| JWT | Authentication |
+| bcrypt | Password Hashing |
+| Nodemailer | Email OTP |
+
+---
+
+## Database
+
+| Technology | Purpose |
+|------------|---------|
+| MongoDB | Database |
+| Mongoose | ODM |
+
+---
+
+## Additional Libraries
+
+| Package | Usage |
+|---------|-------|
+| qrcode | QR Generation |
+| html5-qrcode | QR Scanning |
+| pdfkit | PDF Generation |
+| dotenv | Environment Variables |
+| cookie-parser | Cookies |
+| express-validator | Validation |
+| multer *(optional)* | File Uploads |
+
+---
+
+# Security Features
+
+✔ JWT Authentication
+
+✔ Password Hashing (bcrypt)
+
+✔ Email OTP Verification
+
+✔ Protected Routes
+
+✔ Role-Based Authorization
+
+✔ Environment Variables
+
+✔ Secure Cookie Support
+
+✔ Input Validation
+
+✔ MongoDB Injection Prevention
+
+✔ XSS Protection Ready
+
+✔ Authentication Middleware
+
+✔ Authorization Middleware
+
+---
+
+#  Project Structure
+
+```
+hostel-management-system/
+│
+├── config/
+│   ├── db.js
+│   └── mail.js
+│
+├── controllers/
+│   ├── authController.js
+│   ├── adminController.js
+│   └── studentController.js
+│
+├── middleware/
+│   ├── auth.js
+│   ├── role.js
+│   └── validator.js
+│
+├── models/
+│   ├── Student.js
+│   ├── Leave.js
+│   ├── Equipment.js
+│   ├── Complaint.js
+│   └── FruitDistribution.js
+│
+├── routes/
+│   ├── auth.js
+│   ├── admin.js
+│   └── student.js
+│
+├── utils/
+│   ├── qrGenerator.js
+│   ├── sendOTP.js
+│   └── pdfGenerator.js
+│
+├── public/
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── views/
+│   ├── auth/
+│   ├── student/
+│   ├── admin/
+│   └── partials/
+│
+├── scripts/
+│   └── seedAdmin.js
+│
+├── server.js
+├── package.json
+└── README.md
+```
+
+---
+
+#  Installation
+
+## Clone Repository
+
+```bash
+git clone <repository-url>
+
+cd hostel-management-system
+```
+
+---
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## Configure Environment
+
+Create a `.env`
+
+```env
+PORT=3000
+
+MONGODB_URI=mongodb://localhost:27017/hostel_db
+
+JWT_SECRET=your_super_secret_key
+
+JWT_EXPIRE=7d
+
+NODEMAILER_HOST=smtp.gmail.com
+
+NODEMAILER_PORT=587
+
+NODEMAILER_USER=your_email@gmail.com
+
+NODEMAILER_PASS=your_app_password
+
+APP_URL=http://localhost:3000
+```
+
+---
+
+## Seed Admin
+
+```bash
+node scripts/seedAdmin.js
+```
+
+Default
+
+```
+Email
+
+admin@hostel.com
+
+Password
+
+admin123
+```
+
+---
+
+## Start Development Server
+
+```bash
+npm run dev
+```
+
+Production
+
+```bash
+npm start
 ```
 
 
+
+## If you found this project helpful, consider giving it a star!
